@@ -12,3 +12,4 @@ C:\Desenv\Pessoal\PdfMergerProject\obj\Debug\net8.0\refint\PdfMerger.dll
 C:\Desenv\Pessoal\PdfMergerProject\obj\Debug\net8.0\PdfMerger.pdb
 C:\Desenv\Pessoal\PdfMergerProject\obj\Debug\net8.0\PdfMerger.genruntimeconfig.cache
 C:\Desenv\Pessoal\PdfMergerProject\obj\Debug\net8.0\ref\PdfMerger.dll
+C:\Desenv\Pessoal\PdfMergerProject\obj\Debug\net8.0\PdfMerger.sourcelink.json
