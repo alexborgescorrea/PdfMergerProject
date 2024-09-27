@@ -1,0 +1,14 @@
+C:\Desenv\Teste\Teste-PdfMerge\bin\Debug\net8.0\Teste-PdfMerge.exe
+C:\Desenv\Teste\Teste-PdfMerge\bin\Debug\net8.0\Teste-PdfMerge.deps.json
+C:\Desenv\Teste\Teste-PdfMerge\bin\Debug\net8.0\Teste-PdfMerge.runtimeconfig.json
+C:\Desenv\Teste\Teste-PdfMerge\bin\Debug\net8.0\Teste-PdfMerge.dll
+C:\Desenv\Teste\Teste-PdfMerge\bin\Debug\net8.0\Teste-PdfMerge.pdb
+C:\Desenv\Teste\Teste-PdfMerge\obj\Debug\net8.0\Teste-PdfMerge.GeneratedMSBuildEditorConfig.editorconfig
+C:\Desenv\Teste\Teste-PdfMerge\obj\Debug\net8.0\Teste-PdfMerge.AssemblyInfoInputs.cache
+C:\Desenv\Teste\Teste-PdfMerge\obj\Debug\net8.0\Teste-PdfMerge.AssemblyInfo.cs
+C:\Desenv\Teste\Teste-PdfMerge\obj\Debug\net8.0\Teste-PdfMerge.csproj.CoreCompileInputs.cache
+C:\Desenv\Teste\Teste-PdfMerge\obj\Debug\net8.0\Teste-PdfMerge.dll
+C:\Desenv\Teste\Teste-PdfMerge\obj\Debug\net8.0\refint\Teste-PdfMerge.dll
+C:\Desenv\Teste\Teste-PdfMerge\obj\Debug\net8.0\Teste-PdfMerge.pdb
+C:\Desenv\Teste\Teste-PdfMerge\obj\Debug\net8.0\Teste-PdfMerge.genruntimeconfig.cache
+C:\Desenv\Teste\Teste-PdfMerge\obj\Debug\net8.0\ref\Teste-PdfMerge.dll

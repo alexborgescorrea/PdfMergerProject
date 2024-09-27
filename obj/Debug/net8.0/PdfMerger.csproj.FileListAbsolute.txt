@@ -1,0 +1,14 @@
+C:\Desenv\Pessoal\PdfMergerProject\bin\Debug\net8.0\PdfMerger.exe
+C:\Desenv\Pessoal\PdfMergerProject\bin\Debug\net8.0\PdfMerger.deps.json
+C:\Desenv\Pessoal\PdfMergerProject\bin\Debug\net8.0\PdfMerger.runtimeconfig.json
+C:\Desenv\Pessoal\PdfMergerProject\bin\Debug\net8.0\PdfMerger.dll
+C:\Desenv\Pessoal\PdfMergerProject\bin\Debug\net8.0\PdfMerger.pdb
+C:\Desenv\Pessoal\PdfMergerProject\obj\Debug\net8.0\PdfMerger.GeneratedMSBuildEditorConfig.editorconfig
+C:\Desenv\Pessoal\PdfMergerProject\obj\Debug\net8.0\PdfMerger.AssemblyInfoInputs.cache
+C:\Desenv\Pessoal\PdfMergerProject\obj\Debug\net8.0\PdfMerger.AssemblyInfo.cs
+C:\Desenv\Pessoal\PdfMergerProject\obj\Debug\net8.0\PdfMerger.csproj.CoreCompileInputs.cache
+C:\Desenv\Pessoal\PdfMergerProject\obj\Debug\net8.0\PdfMerger.dll
+C:\Desenv\Pessoal\PdfMergerProject\obj\Debug\net8.0\refint\PdfMerger.dll
+C:\Desenv\Pessoal\PdfMergerProject\obj\Debug\net8.0\PdfMerger.pdb
+C:\Desenv\Pessoal\PdfMergerProject\obj\Debug\net8.0\PdfMerger.genruntimeconfig.cache
+C:\Desenv\Pessoal\PdfMergerProject\obj\Debug\net8.0\ref\PdfMerger.dll
