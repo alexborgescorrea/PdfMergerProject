@@ -1,18 +1,17 @@
 ﻿using System.Buffers;
 using System.Text;
 using PdfMerger.Exceptions;
-using PdfMerger.Pdf.Mergers;
 
 namespace PdfMerger.Pdf.Readers;
 
 public class PdfReader : IDisposable, IAsyncDisposable
 {
-    private static readonly byte[] HeaderPdfFilter = [0x25, 0x50, 0x44, 0x46, 0x2d];
     private static readonly byte[] NewLinePdfFilter = [10];
-    private static readonly SearchValues<byte> SeparatorsPdfFilter = SearchValues.Create([(byte)' ', (byte)'\n', (byte)'\t', (byte)'%', (byte)'<', (byte)'(', (byte)'[', (byte)'{']);
-    private static readonly SearchValues<byte> SpacesPdfFilter = SearchValues.Create([(byte)' ', (byte)'\n', (byte)'\t']);
+    private static readonly SearchValues<byte> StartDelimitersSearchValues = SearchValues.Create(PdfConstants.StartDelimiters);
+    private static readonly SearchValues<byte> DelimitersSearchValues = SearchValues.Create(PdfConstants.Delimiters);
+    private static readonly SearchValues<byte> SpacesSearchValues = SearchValues.Create(PdfConstants.Spaces);
     private readonly Stream _stream;
-    private readonly byte[] _bytesBuffer = new byte[50];
+    private readonly byte[] _bytesBuffer = new byte[300];
     private Memory<byte> _buffer = Memory<byte>.Empty;
     private int _currentBufferIndex;
     
@@ -23,22 +22,36 @@ public class PdfReader : IDisposable, IAsyncDisposable
         _stream = stream;
     }
 
-    public byte SingleValue() => _buffer.Span[_currentBufferIndex];
+    public byte Value => _buffer.Span[_currentBufferIndex];
     
     public async Task<bool> BeginReadPdfAsync()
     {
-        return await FindAndMoveAsync(HeaderPdfFilter) &&
-               await MoveAsync(HeaderPdfFilter.Length) && 
-               await FindAnyAndMoveAsync(SeparatorsPdfFilter);
+        if (!await FindAndMoveAsync(PdfConstants.PdfHeaderSignature))
+            return false;
+        
+        await MoveAsync(PdfConstants.PdfHeaderSignature.Length);
+        await NextStartDelimiterOrThrowAsync();
+        await NextNonSpaceValueOrThrowAsync();
+        return true;
     }
-
+    
     public Task<bool> NextLineAsync() => FindAndMoveAsync(NewLinePdfFilter);
 
-    public bool CurrentTokenIsSpace() => SpacesPdfFilter.Contains(SingleValue());
+    public bool CurrentTokenIsSpace() => SpacesSearchValues.Contains(Value);
     
     public async Task NextNonSpaceValueOrThrowAsync()
     {
-        await IndexOfAnyExceptAndMoveOrThrowAsync(SpacesPdfFilter);
+        await IndexOfAnyExceptAndMoveOrThrowAsync(SpacesSearchValues);
+    }
+    
+    public async Task NextStartDelimiterOrThrowAsync()
+    {
+        await FindAnyAndMoveAsync(StartDelimitersSearchValues);
+    }
+    
+    public async Task<bool> NextDelimiterAsync()
+    {
+        return await FindAnyAndMoveAsync(DelimitersSearchValues);
     }
 
     public async Task FindAnyAndMoveOrThrowAsync(SearchValues<byte> filters)
@@ -155,6 +168,16 @@ public class PdfReader : IDisposable, IAsyncDisposable
         var endIndex = startIndex + numBytes;
         
         return _buffer[startIndex..endIndex];
+    }
+    
+    public async Task<Memory<byte>> ChunkAsync(int numBytes)
+    {
+        if (!CanMove(numBytes))
+            await ReadNextBytesToBufferAsync(_buffer.Length - _currentBufferIndex);
+
+        var endIndex = _currentBufferIndex + numBytes;
+        
+        return _buffer[_currentBufferIndex..endIndex];
     }
     
     public async Task<bool> MoveAsync(int numBytes)

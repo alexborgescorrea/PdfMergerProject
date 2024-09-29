@@ -1,41 +1,36 @@
-﻿using System.Buffers;
-using PdfMerger.Exceptions;
-using PdfMerger.Pdf.Readers;
+﻿using PdfMerger.Pdf.Readers;
 
 namespace PdfMerger.Pdf.Processors;
 
 internal class ProcessorGroup
 {
-    private readonly SearchValues<byte> _searchValues;
-    public ProcessorGroup(IProcessor[] processors)
+    private readonly IProcessor? _endProcessor;
+    
+    public ProcessorGroup(IProcessor[] processors, IProcessor? endProcessor = null)
     {
         Processors = processors;
-        _searchValues = SearchValues.Create(processors.SelectMany(p => p.Tokens).ToArray());
+        _endProcessor = endProcessor;
     }
     
     public IReadOnlyList<IProcessor> Processors { get; }
 
-    public async Task<bool> ProcessAsync(PdfReader reader)
+    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader)
     {
-        await reader.FindAnyAndMoveOrThrowAsync(_searchValues);
-        var value = reader.SingleValue();
-        var processor = ChoiceProcessor(value);
-        if (processor is null)
-            return false;
-            
-        await processor.ProcessAsync(reader, value);
-
-        return true;
-    }
-    
-    private IProcessor? ChoiceProcessor(byte value)
-    {
-        foreach (var processo in Processors)
+        while (true)
         {
-            if (processo.CanProcess(value))
-                return processo;
-        }
+            foreach (var processor in Processors)
+            {
+                if (await processor.ProcessAsync(context, reader))
+                {
+                    if (_endProcessor is null || processor == _endProcessor)
+                        return true;
+                    
+                    break;
+                }
+            }
 
-        return null;
+            if (!await reader.MoveAsync(1))
+                return false;
+        }
     }
 }
