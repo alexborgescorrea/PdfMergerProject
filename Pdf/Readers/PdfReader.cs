@@ -4,7 +4,7 @@ using PdfMerger.Exceptions;
 
 namespace PdfMerger.Pdf.Readers;
 
-public class PdfReader : IDisposable, IAsyncDisposable
+internal class PdfReader : IDisposable, IAsyncDisposable
 {
     private static readonly byte[] NewLinePdfFilter = [10];
     private static readonly SearchValues<byte> StartDelimitersSearchValues = SearchValues.Create(PdfConstants.StartDelimiters);

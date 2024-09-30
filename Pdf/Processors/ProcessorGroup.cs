@@ -4,23 +4,24 @@ namespace PdfMerger.Pdf.Processors;
 
 internal class ProcessorGroup
 {
+    private readonly IProcessor[] _processors;
     private readonly IProcessor? _endProcessor;
     
     public ProcessorGroup(IProcessor[] processors, IProcessor? endProcessor = null)
     {
-        Processors = processors;
+        _processors = processors;
         _endProcessor = endProcessor;
     }
     
-    public IReadOnlyList<IProcessor> Processors { get; }
-
-    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader)
+    public async Task<bool> ProcessAsync(PdfContext context, PdfReader2 reader)
     {
         while (true)
         {
-            foreach (var processor in Processors)
+            var sucess = false;
+            foreach (var processor in _processors)
             {
-                if (await processor.ProcessAsync(context, reader))
+                sucess = await processor.ProcessAsync(context, reader);
+                if (sucess)
                 {
                     if (_endProcessor is null || processor == _endProcessor)
                         return true;
@@ -29,7 +30,10 @@ internal class ProcessorGroup
                 }
             }
 
-            if (!await reader.MoveAsync(1))
+            if (sucess)
+                continue;
+            
+            if (_endProcessor is null || !await reader.NextTokenAsync())
                 return false;
         }
     }

@@ -18,7 +18,7 @@ internal class StartObjProcessor : IProcessor
         EndObjProcessor.Instance
     );
     
-    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader)
+    public async Task<bool> ProcessAsync(PdfContext context, PdfReader2 reader)
     {
         if (!await MoveNextToken(reader))
             return false;
@@ -26,7 +26,17 @@ internal class StartObjProcessor : IProcessor
         return await ProcessorGroup.ProcessAsync(context, reader);
     }
     
-    private async Task<bool> MoveNextToken(PdfReader reader)
+    // private async Task WriterAsync(PdfContext context, PdfReader2 reader)
+    // {
+    //     var chunk = await reader.ChunkAsync(MaxIdentifierLength);
+    //     var index = StartObjMatcher.Instance.Match(chunk.Span);
+    //     if (index == -1)
+    //         return false;
+    //
+    //     return await reader.MoveAsync(index);
+    // }
+    
+    private async Task<bool> MoveNextToken(PdfReader2 reader)
     {
         var chunk = await reader.ChunkAsync(MaxIdentifierLength);
         var index = StartObjMatcher.Instance.Match(chunk.Span);

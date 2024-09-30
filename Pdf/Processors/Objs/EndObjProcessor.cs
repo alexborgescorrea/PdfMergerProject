@@ -8,12 +8,12 @@ internal class EndObjProcessor : IProcessor
     public static readonly EndObjProcessor Instance = new();
     private const int MaxIdentifierLength = 255;
 
-    public Task<bool> ProcessAsync(PdfContext context, PdfReader reader)
+    public Task<bool> ProcessAsync(PdfContext context, PdfReader2 reader)
     {
-        return MoveNextToken(reader);
+        return MoveNextTokenAsync(reader);
     }
 
-    private async Task<bool> MoveNextToken(PdfReader reader)
+    private async Task<bool> MoveNextTokenAsync(PdfReader2 reader)
     {
         var chunk = await reader.ChunkAsync(MaxIdentifierLength);
         var index = EndObjMatcher.Instance.Match(chunk.Span);

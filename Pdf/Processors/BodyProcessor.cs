@@ -4,12 +4,11 @@ using PdfMerger.Pdf.Readers;
 
 namespace PdfMerger.Pdf.Processors;
 
-internal class BodyProcessor
+internal class BodyProcessor : IProcessor
 {
-    private static readonly CommentProcessor CommentProcessor = new ();
     private static readonly ProcessorGroup ProcessorGroup = new([CommentProcessor.Instance, StartObjProcessor.Instance, StringProcessor.Instance, HexadecimalProcessor.Instance, XRefProcessor.Instance], XRefProcessor.Instance);
-    public async Task ProcessAsync(PdfContext context, PdfReader reader)
+    public Task<bool> ProcessAsync(PdfContext context, PdfReader2 reader)
     {
-        await ProcessorGroup.ProcessAsync(context, reader);
+        return ProcessorGroup.ProcessAsync(context, reader);
     }
 }

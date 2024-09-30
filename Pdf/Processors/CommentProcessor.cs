@@ -6,7 +6,7 @@ internal class CommentProcessor : IProcessor
 {
     public static CommentProcessor Instance { get; } = new();
 
-    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader)
+    public async Task<bool> ProcessAsync(PdfContext context, PdfReader2 reader)
     {
         if (reader.Value != '%')
             return false;

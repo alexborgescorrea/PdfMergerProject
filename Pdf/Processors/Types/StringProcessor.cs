@@ -10,19 +10,21 @@ internal class StringProcessor : IProcessor
     private const byte BackSlashToken = 0x5C;
     private static readonly SearchValues<byte> NextTokensSearchValues = SearchValues.Create([(byte)')', BackSlashToken]);
     
-    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader)
+    public async Task<bool> ProcessAsync(PdfContext context, PdfReader2 reader)
     {
         if (reader.Value != '(')
             return false;
         
         while (true)
         {
-            await reader.FindAnyAndMoveOrThrowAsync(NextTokensSearchValues);
+            if (!await reader.FindAnyAndMoveAsync(NextTokensSearchValues))
+                return false;
 
             if (reader.Value == ')')
                 return true;
 
-            await reader.MoveOrThrowAsync(2);
+            if (!await reader.MoveAsync(2))
+                return false;
         }
     }
 }

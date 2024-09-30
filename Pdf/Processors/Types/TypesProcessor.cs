@@ -23,8 +23,8 @@ internal class TypesProcessor : IProcessor
         ]
     );
     
-    public Task<bool> ProcessAsync(PdfContext context, PdfReader reader)
+    public Task<bool> ProcessAsync(PdfContext context, PdfReader2 reader)
     {
-        throw new NotImplementedException();
+        return ProcessorGroup.ProcessAsync(context, reader);
     }
 }

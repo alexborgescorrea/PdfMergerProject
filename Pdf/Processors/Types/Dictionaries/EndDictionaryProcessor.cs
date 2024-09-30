@@ -8,7 +8,7 @@ internal class EndDictionaryProcessor : IProcessor
     
     private static readonly byte[] Tokens = [(byte)'>', (byte)'>'];
 
-    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader)
+    public async Task<bool> ProcessAsync(PdfContext context, PdfReader2 reader)
     {
         var chunk = await reader.ChunkAsync(2);
 

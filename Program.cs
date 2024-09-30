@@ -10,6 +10,6 @@ await using var sourceStream1 = new FileStream(sourcePath1, FileMode.Open, FileA
 await using var sourceStream2 = new FileStream(sourcePath2, FileMode.Open, FileAccess.Read);
 await using var destinationStream = new FileStream(destinationPath, FileMode.OpenOrCreate, FileAccess.Write);
 
-await new PdfProcessor().ProcessAsync(new PdfReader(sourceStream1));
+await new PdfProcessor().ProcessAsync(new(new(destinationStream)), new PdfReader2(sourceStream1));
 
 Console.WriteLine("Finalizado!!!!");

@@ -17,12 +17,11 @@ internal class StartDictionaryProcessor : IProcessor
     );
     private static readonly byte[] Tokens = [(byte)'<', (byte)'<'];
     
-    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader)
+    public async Task<bool> ProcessAsync(PdfContext context, PdfReader2 reader)
     {
-        var chunk = await reader.ChunkAsync(2);
-        if (!chunk.Span.SequenceEqual(Tokens))
-            return false;
+        if (await reader.StartWithAsync(Tokens) && await reader.MoveAsync(2))
+            return await ProcessorGroup.ProcessAsync(context, reader);
 
-        return true;
+        return false;
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace PdfMerger.Pdf.Matchers.Base;
+﻿using PdfMerger.Pdf.Matchers.Base;
+
+namespace PdfMerger.Pdf.Matchers;
 
 internal class BooleanMatcher : IMatcher
 {
@@ -6,7 +8,6 @@ internal class BooleanMatcher : IMatcher
     
     private static readonly IMatcher[] Matchers = 
     [
-        DelimiterMatcher.Instance, 
         new OrMatcher("true", "false"), 
         DelimiterMatcher.Instance
     ];

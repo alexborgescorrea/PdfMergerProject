@@ -4,5 +4,5 @@ namespace PdfMerger.Pdf.Processors;
 
 internal interface IProcessor
 {
-    Task<bool> ProcessAsync(PdfContext context, PdfReader reader);
+    Task<bool> ProcessAsync(PdfContext context, PdfReader2 reader);
 }

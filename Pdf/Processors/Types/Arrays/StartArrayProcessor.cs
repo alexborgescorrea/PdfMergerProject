@@ -15,12 +15,12 @@ internal class StartArrayProcessor : IProcessor
         EndArrayProcessor.Instance
     );
     
-    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader)
+    public async Task<bool> ProcessAsync(PdfContext context, PdfReader2 reader)
     {
         if (reader.Value != '[')
             return false;
 
-        return await reader.MoveAsync(1) &&
+        return await reader.NextTokenAsync() &&
                await ProcessorGroup.ProcessAsync(context, reader);
     }
 }

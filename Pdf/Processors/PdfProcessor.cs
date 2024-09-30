@@ -5,13 +5,14 @@ namespace PdfMerger.Pdf.Processors;
 
 internal class PdfProcessor
 {
+    private readonly HeaderProcessor _headerProcessor = new();
     private readonly BodyProcessor _bodyProcessor = new(); 
         
-    public async Task ProcessAsync(PdfReader reader)
+    public async Task ProcessAsync(PdfContext context, PdfReader2 reader)
     {
-        if (!await reader.BeginReadPdfAsync())
+        if (!await _headerProcessor.ProcessAsync(context, reader))
             ThrowHelper.ThrowInvalidPdf();
         
-        await _bodyProcessor.ProcessAsync(new(), reader);
+        await _bodyProcessor.ProcessAsync(context, reader);
     }
 }

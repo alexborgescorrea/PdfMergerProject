@@ -5,18 +5,19 @@ namespace PdfMerger.Pdf.Processors.Types;
 internal class HexadecimalProcessor : IProcessor 
 {
     public static readonly HexadecimalProcessor Instance = new();
+    private static readonly byte[] Tokens = [(byte)'<', (byte)'<'];
+    private static readonly byte GreaterThanToken = (byte)'>';
     
-    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader)
+    public async Task<bool> ProcessAsync(PdfContext context, PdfReader2 reader)
     {
-        if (reader.Value !='<')
+        if (reader.Value != '<')
             return false;
         
-        var nextToken = await reader.PeekAsync();
-        if (nextToken =='<')
+        var chunk = await reader.ChunkAsync(2);
+        if (chunk.Span.SequenceEqual(Tokens))
             return false;
-            
-        await reader.FindAndMoveOrThrowAsync((byte)'>');
-
-        return true;
+        
+        return await reader.FindAndMoveAsync(GreaterThanToken) && 
+               await reader.NextTokenAsync();
     }
 }

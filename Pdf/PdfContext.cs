@@ -1,6 +1,13 @@
-﻿namespace PdfMerger.Pdf;
+﻿using PdfMerger.Pdf.Writers;
+
+namespace PdfMerger.Pdf;
 
 internal class PdfContext
 {
-    public int Scope { get; set; }
+    public PdfContext(PdfWriter pdfWriter)
+    {
+        PdfWriter = pdfWriter;
+    }
+    
+    public PdfWriter PdfWriter { get; }
 }

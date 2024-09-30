@@ -2,17 +2,17 @@
 
 namespace PdfMerger.Pdf.Matchers;
 
-internal class EndObjMatcher : IMatcher
+internal class NumberTypeMatcher : IMatcher
 {
-    public static readonly EndObjMatcher Instance = new();
+    public static readonly NumberTypeMatcher Instance = new();
     
     private static readonly IMatcher[] Matchers = 
     [
-        new SequenceMatcher("endobj"), 
-        StartDelimiterMatcher.Instance
+        SignalNumberMatcher.Instance,  
+        DelimiterMatcher.Instance
     ];
 
-    private EndObjMatcher() {}
+    private NumberTypeMatcher() {}
     
     public int Match(ReadOnlySpan<byte> bytes) => Matcher.Match(Matchers, bytes);
 }

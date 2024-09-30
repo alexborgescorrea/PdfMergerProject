@@ -8,7 +8,6 @@ internal class StartObjMatcher : IMatcher
     
     private static readonly IMatcher[] Matchers = 
     [
-        EndDelimiterMatcher.Instance,
         NumberMatcher.Instance, 
         SpaceMatcher.Instance, 
         NumberMatcher.Instance, 
