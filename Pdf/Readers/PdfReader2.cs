@@ -19,6 +19,7 @@ internal class PdfReader2
         _stream = stream;
     }
 
+    public Memory<byte> Buffer => _buffer[_currentBufferIndex..];
     public byte Value => _buffer.Span[_currentBufferIndex];
     
     public async Task<bool> NextTokenAsync()
@@ -86,7 +87,7 @@ internal class PdfReader2
         return await FindAnyExceptAndMoveAsync(SpacesSearchValues);
     }
     
-    private async Task<bool> NextDelimiterAsync()
+    public async Task<bool> NextDelimiterAsync()
     {
         return await FindAnyAndMoveAsync(DelimitersSearchValues);
     }
@@ -158,12 +159,12 @@ internal class PdfReader2
     }
     
     private bool IsSpace() => PdfConstants.Spaces.Contains(Value);
-    
+    public bool IsDelimiterSpaces() => PdfConstants.Delimiters.Contains(Value);
     private bool IsDelimiterWithoutSpaces() => PdfConstants.DelimitersWithoutSpaces.Contains(Value);
     
     private bool CanMove(int numBytes) => _currentBufferIndex + numBytes < _buffer.Length;
     
-    private async Task<bool> ReadNextBytesToBufferAsync(int keepLastBytes = 0)
+    public async Task<bool> ReadNextBytesToBufferAsync(int keepLastBytes = 0)
     {
         if (keepLastBytes > 0 && _buffer.Length > 0)
             _buffer[^keepLastBytes..].CopyTo(_buffer);
@@ -174,6 +175,11 @@ internal class PdfReader2
         _currentBufferIndex = 0;
         
         return num > 0;
+    }
+
+    public int IndexOfDelimiterInBuffer()
+    {
+        return _buffer.Span[_currentBufferIndex..].IndexOfAny(DelimitersSearchValues);
     }
     
     public string Debug()

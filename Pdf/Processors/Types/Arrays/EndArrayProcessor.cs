@@ -8,9 +8,11 @@ internal class EndArrayProcessor : IProcessor
     
     public async Task<bool> ProcessAsync(PdfContext context, PdfReader2 reader)
     {
-        if (reader.Value == ']')
-            return await reader.NextTokenAsync();
-
-        return false;
+        if (reader.Value != ']')
+            return false;
+            
+        await context.PdfWriter.WriterEndArrayAsync();
+        
+        return await reader.NextTokenAsync();
     }
 }

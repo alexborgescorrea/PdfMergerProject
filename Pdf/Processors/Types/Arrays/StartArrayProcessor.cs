@@ -20,7 +20,8 @@ internal class StartArrayProcessor : IProcessor
         if (reader.Value != '[')
             return false;
 
-        return await reader.NextTokenAsync() &&
-               await ProcessorGroup.ProcessAsync(context, reader);
+        await context.PdfWriter.WriterStartArrayAsync();
+        
+        return await reader.NextTokenAsync() && await ProcessorGroup.ProcessAsync(context, reader);
     }
 }

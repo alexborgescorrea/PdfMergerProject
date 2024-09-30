@@ -8,8 +8,9 @@ internal class HeaderProcessor : IProcessor
     {
         if (!await reader.FindAndMoveAsync(PdfConstants.PdfHeaderSignature))
             return false;
-
+        
         await context.PdfWriter.WriterHeaderAsync();
+        await context.PdfWriter.WriterBiStringAsync();
         
         return await reader.NextTokenAsync();
     }

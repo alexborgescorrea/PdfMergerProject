@@ -20,7 +20,10 @@ internal class StartDictionaryProcessor : IProcessor
     public async Task<bool> ProcessAsync(PdfContext context, PdfReader2 reader)
     {
         if (await reader.StartWithAsync(Tokens) && await reader.MoveAsync(2))
+        {
+            await context.PdfWriter.WriterStartDictionaryAsync();
             return await ProcessorGroup.ProcessAsync(context, reader);
+        }
 
         return false;
     }

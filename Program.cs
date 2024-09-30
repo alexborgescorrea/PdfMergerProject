@@ -8,7 +8,8 @@ var destinationPath = Path.Combine(basePath, "resultado.pdf");
 
 await using var sourceStream1 = new FileStream(sourcePath1, FileMode.Open, FileAccess.Read);
 await using var sourceStream2 = new FileStream(sourcePath2, FileMode.Open, FileAccess.Read);
-await using var destinationStream = new FileStream(destinationPath, FileMode.OpenOrCreate, FileAccess.Write);
+await using var destinationStream = File.Exists(destinationPath) ? new FileStream(destinationPath, FileMode.Truncate, FileAccess.Write) 
+                                                                 : new FileStream(destinationPath, FileMode.OpenOrCreate, FileAccess.Write);
 
 await new PdfProcessor().ProcessAsync(new(new(destinationStream)), new PdfReader2(sourceStream1));
 

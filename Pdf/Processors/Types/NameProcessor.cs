@@ -6,11 +6,16 @@ internal class NameProcessor : IProcessor
 {
     public static readonly NameProcessor Instance = new();
     
+    
     public async Task<bool> ProcessAsync(PdfContext context, PdfReader2 reader)
     {
-        if (reader.Value == '/')
-            return await reader.MoveAsync(1) && await reader.NextTokenAsync();
+        if (reader.Value != '/')
+            return false;
+        
+        if (!await reader.MoveAsync(1))
+            return false;
 
-        return false;
+        await context.PdfWriter.WriterStartNameAsync();
+        return await context.PdfWriter.WriterAndMoveAtDelimiterAsync(reader);
     }
 }
