@@ -15,7 +15,7 @@ internal class BooleanProcessor : IProcessor
         if (index == -1)
             return false;
 
-        await context.PdfWriter.WriterBooleanAsync(chunk.Span[0]);
+        await context.PdfWriter.WriteBooleanAsync(chunk.Span[0]);
 
         return await reader.MoveAsync(index);
     }

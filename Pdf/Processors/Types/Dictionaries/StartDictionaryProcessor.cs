@@ -21,7 +21,7 @@ internal class StartDictionaryProcessor : IProcessor
     {
         if (await reader.StartWithAsync(Tokens) && await reader.MoveAsync(2))
         {
-            await context.PdfWriter.WriterStartDictionaryAsync();
+            await context.PdfWriter.WriteStartDictionaryAsync();
             return await ProcessorGroup.ProcessAsync(context, reader);
         }
 

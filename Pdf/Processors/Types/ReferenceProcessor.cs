@@ -15,7 +15,7 @@ internal class ReferenceProcessor : IProcessor
         if (index == -1)
             return false;
 
-        await context.PdfWriter.WriterLineAsync(chunk[..index]);
+        await context.PdfWriter.WriteLineAsync(chunk[..index]);
         
         return await reader.MoveAsync(index);
     }

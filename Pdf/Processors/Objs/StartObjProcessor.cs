@@ -32,8 +32,11 @@ internal class StartObjProcessor : IProcessor
         var index = StartObjMatcher.Instance.Match(chunk.Span);
         if (index == -1)
             return false;
+
+        if (chunk.Span.StartsWith("\n4028 0 obj"u8.ToArray()))
+            Console.WriteLine("");
         
-        await context.PdfWriter.WriterLineAsync(chunk.Slice(0, index));
+        await context.PdfWriter.WriteLineAsync(chunk[..index]);
 
         return await reader.MoveAsync(index);
     }

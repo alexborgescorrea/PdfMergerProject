@@ -16,8 +16,9 @@ internal class HexadecimalProcessor : IProcessor
         var chunk = await reader.ChunkAsync(2);
         if (chunk.Span.SequenceEqual(Tokens))
             return false;
-        
-        return await reader.FindAndMoveAsync(GreaterThanToken) && 
+
+        context.PdfWriter.WriteNewLine();
+        return await context.PdfWriter.WriteAndMoveAtIndexOfAsync(reader, GreaterThanToken) && 
                await reader.NextTokenAsync();
     }
 }

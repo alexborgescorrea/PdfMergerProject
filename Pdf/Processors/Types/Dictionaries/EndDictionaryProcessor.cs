@@ -13,7 +13,7 @@ internal class EndDictionaryProcessor : IProcessor
         var chunk = await reader.ChunkAsync(2);
         if (chunk.Span.SequenceEqual(Tokens) && await reader.MoveAsync(2))
         {
-            await context.PdfWriter.WriterEndDictionaryAsync();
+            await context.PdfWriter.WriteEndDictionaryAsync();
             return true;
         }
 

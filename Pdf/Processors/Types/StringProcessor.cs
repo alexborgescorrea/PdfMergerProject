@@ -15,15 +15,19 @@ internal class StringProcessor : IProcessor
         if (reader.Value != '(')
             return false;
         
+        context.PdfWriter.WriteNewLine();
         while (true)
         {
-            if (!await reader.FindAnyAndMoveAsync(NextTokensSearchValues))
+            if (!await context.PdfWriter.WriteAndMoveAtIndexOfAnyAsync(reader, NextTokensSearchValues))
                 return false;
 
             if (reader.Value == ')')
-                return true;
+                return await reader.NextTokenAsync();
 
-            if (!await reader.MoveAsync(2))
+            if (!await reader.MoveAsync(1))
+                return false;
+            
+            if (!await context.PdfWriter.CopyAndMovieAsync(reader, 2))
                 return false;
         }
     }

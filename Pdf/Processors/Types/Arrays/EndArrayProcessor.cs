@@ -11,7 +11,7 @@ internal class EndArrayProcessor : IProcessor
         if (reader.Value != ']')
             return false;
             
-        await context.PdfWriter.WriterEndArrayAsync();
+        await context.PdfWriter.WriteEndArrayAsync();
         
         return await reader.NextTokenAsync();
     }

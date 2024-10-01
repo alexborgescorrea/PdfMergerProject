@@ -15,7 +15,7 @@ internal class NameProcessor : IProcessor
         if (!await reader.MoveAsync(1))
             return false;
 
-        await context.PdfWriter.WriterStartNameAsync();
-        return await context.PdfWriter.WriterAndMoveAtDelimiterAsync(reader);
+        await context.PdfWriter.WriteStartNameAsync();
+        return await context.PdfWriter.WriteAndMoveAtDelimiterAsync(reader);
     }
 }

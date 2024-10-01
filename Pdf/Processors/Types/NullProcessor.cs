@@ -16,7 +16,12 @@ internal class NullProcessor : IProcessor
         var index = NullMatcher.Instance.Match(chunk.Span);
         if (index == -1)
             return false;
-            
+
+        if (index > 0)
+            await context.PdfWriter.WriteNull();
+        else
+            await context.PdfWriter.WriteNullByte();
+        
         return await reader.MoveAsync(index);
     }
 }

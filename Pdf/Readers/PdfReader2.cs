@@ -20,8 +20,22 @@ internal class PdfReader2
     }
 
     public Memory<byte> Buffer => _buffer[_currentBufferIndex..];
-    public byte Value => _buffer.Span[_currentBufferIndex];
     
+    public byte Value
+    {
+        get
+        {
+            try
+            {
+                return _buffer.Span[_currentBufferIndex];
+            }
+            catch
+            {
+                throw;
+            }
+        }
+    }
+
     public async Task<bool> NextTokenAsync()
     {
         if (IsSpace())
@@ -180,6 +194,44 @@ internal class PdfReader2
     public int IndexOfDelimiterInBuffer()
     {
         return _buffer.Span[_currentBufferIndex..].IndexOfAny(DelimitersSearchValues);
+    }
+    public int IndexOfInBuffer(byte filter)
+    {
+        return _buffer.Span[_currentBufferIndex..].IndexOf(filter);
+    }
+    
+    public int IndexOfInBuffer(Memory<byte> filter)
+    {
+        return _buffer.Span[_currentBufferIndex..].IndexOf(filter.Span);
+    }
+    
+    public int IndexOfAnyInBuffer(SearchValues<byte> filter)
+    {
+        return _buffer.Span[_currentBufferIndex..].IndexOfAny(filter);
+    }
+
+    public ValueTask CopyToAndMoveAsync(Stream stream, int index)
+    {
+        var startIndex = _currentBufferIndex;
+        _currentBufferIndex += index;
+        
+        return stream.WriteAsync(_buffer[startIndex..(_currentBufferIndex + 1)]);
+    }
+    
+    public ValueTask CopyBufferToAsync(Stream stream, int index)
+    {
+        return stream.WriteAsync(_buffer[_currentBufferIndex..(_currentBufferIndex + index + 1)]);
+    }
+    
+    public ValueTask CopyAllBufferToAsync(Stream stream)
+    {
+        return stream.WriteAsync(_buffer[_currentBufferIndex..]);
+    }
+    
+    public void MoveBufferTo(int index)
+    {
+        var startIndex = _currentBufferIndex;
+        _currentBufferIndex += index;
     }
     
     public string Debug()

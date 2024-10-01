@@ -1,4 +1,5 @@
-﻿using PdfMerger.Pdf.Readers;
+﻿using System.Buffers;
+using PdfMerger.Pdf.Readers;
 
 namespace PdfMerger.Pdf.Writers;
 
@@ -6,7 +7,7 @@ internal class PdfWriter
 {
     private static readonly byte[] PdfHeader = "%PDF-2.0"u8.ToArray();
     private static readonly byte[] BitString = [0x0D, 0x25, 0xE2, 0xE3, 0xCF, 0xD3];
-    private static readonly byte[] EndObj = "\nendobj"u8.ToArray();
+    private static readonly byte[] EndObj = "\nxxx-endobj"u8.ToArray();
     private static readonly byte[] StartDictionary = "\n<<"u8.ToArray();
     private static readonly byte[] EndDictionary = "\n>>"u8.ToArray();
     private static readonly byte[] StartName = "\n/"u8.ToArray();
@@ -14,6 +15,8 @@ internal class PdfWriter
     private static readonly byte[] EndArray = " ]"u8.ToArray();
     private static readonly byte[] TrueValue = " true"u8.ToArray();
     private static readonly byte[] FalseValue = " false"u8.ToArray();
+    private static readonly byte[] NullValue = " null"u8.ToArray();
+    private static readonly byte[] NullByteValue = [0x20, 0];
     
     private readonly Stream _stream;
 
@@ -22,12 +25,12 @@ internal class PdfWriter
         _stream = stream;
     }
 
-    public Task WriterHeaderAsync()
+    public Task WriteHeaderAsync()
     {
         return _stream.WriteAsync(PdfHeader, 0, PdfHeader.Length);
     }
 
-    public Task WriterBiStringAsync()
+    public Task WriteBiStringAsync()
     {
         return _stream.WriteAsync(BitString, 0, BitString.Length);
     }
@@ -37,53 +40,63 @@ internal class PdfWriter
         _stream.WriteByte(PdfConstants.NewLine);
     }
     
-    public ValueTask WriterLineAsync(ReadOnlyMemory<byte> bytes)
+    public ValueTask WriteLineAsync(ReadOnlyMemory<byte> bytes)
     {
         WriteNewLine();
-        return WriterAsync(bytes);
+        return WriteAsync(bytes);
     }
     
-    public ValueTask WriterAsync(ReadOnlyMemory<byte> bytes)
+    public ValueTask WriteAsync(ReadOnlyMemory<byte> bytes)
     {
         return _stream.WriteAsync(bytes);
     }
     
-    public ValueTask WriterEndObjAsync()
+    public ValueTask WriteEndObjAsync()
     {
         return _stream.WriteAsync(EndObj);
     }
     
-    public ValueTask WriterStartDictionaryAsync()
+    public ValueTask WriteStartDictionaryAsync()
     {
         return _stream.WriteAsync(StartDictionary);
     }
     
-    public ValueTask WriterEndDictionaryAsync()
+    public ValueTask WriteEndDictionaryAsync()
     {
         return _stream.WriteAsync(EndDictionary);
     }
     
-    public ValueTask WriterStartNameAsync()
+    public ValueTask WriteStartNameAsync()
     {
         return _stream.WriteAsync(StartName);
     }
     
-    public ValueTask WriterStartArrayAsync()
+    public ValueTask WriteStartArrayAsync()
     {
         return _stream.WriteAsync(StartArray);
     }
     
-    public ValueTask WriterEndArrayAsync()
+    public ValueTask WriteEndArrayAsync()
     {
         return _stream.WriteAsync(EndArray);
     }
 
-    public ValueTask WriterBooleanAsync(byte value)
+    public ValueTask WriteBooleanAsync(byte value)
     {
         return _stream.WriteAsync(value == 't' ? TrueValue : FalseValue);
     }
     
-    public async Task<bool> WriterAndMoveAtDelimiterAsync(PdfReader2 reader)
+    public ValueTask WriteNullByte()
+    {
+        return _stream.WriteAsync(NullByteValue);
+    }
+    
+    public ValueTask WriteNull()
+    {
+        return _stream.WriteAsync(NullValue);
+    }
+    
+    public async Task<bool> WriteAndMoveAtDelimiterAsync(PdfReader2 reader)
     {
         do
         {
@@ -91,12 +104,75 @@ internal class PdfWriter
 
             if (index != -1)
             {
-                await WriterAsync(reader.Buffer[..index]);
+                await reader.CopyBufferToAsync(_stream, index - 1);
+                reader.MoveBufferTo(index);
+                return true;
+            }
+            
+            await reader.CopyAllBufferToAsync(_stream);
+        } 
+        while (await reader.ReadNextBytesToBufferAsync());
+
+        return false;
+    }
+    
+    public async Task<bool> WriteAndMoveAtIndexOfAsync(PdfReader2 reader, byte filter)
+    {
+        do
+        {
+            var index = reader.IndexOfInBuffer(filter);
+            if (index != -1)
+            {
+                await reader.CopyToAndMoveAsync(_stream, index);
                 return true;
             }
         } 
         while (await reader.ReadNextBytesToBufferAsync());
 
         return false;
+    }
+    
+    public async Task<bool> WriteAndMoveAtIndexOfAsync(PdfReader2 reader, Memory<byte> filter)
+    {
+        do
+        {
+            var index = reader.IndexOfInBuffer(filter);
+            if (index != -1)
+            {
+                await reader.CopyToAndMoveAsync(_stream, index + filter.Length - 1);
+                return true;
+            }
+            
+            await reader.CopyAllBufferToAsync(_stream);
+        } 
+        while (await reader.ReadNextBytesToBufferAsync(filter.Length));
+
+        return false;
+    }
+    
+    public async Task<bool> WriteAndMoveAtIndexOfAnyAsync(PdfReader2 reader, SearchValues<byte> filter)
+    {
+        do
+        {
+            var index = reader.IndexOfAnyInBuffer(filter);
+            if (index != -1)
+            {
+                await reader.CopyToAndMoveAsync(_stream, index);
+                return true;
+            }
+
+            await reader.CopyAllBufferToAsync(_stream);
+        } 
+        while (await reader.ReadNextBytesToBufferAsync());
+
+        return false;
+    }
+    
+    public async Task<bool> CopyAndMovieAsync(PdfReader2 reader, int length)
+    {
+        var chunk = await reader.ChunkAsync(length);
+        await WriteAsync(chunk);
+
+        return await reader.MoveAsync(length);
     }
 }

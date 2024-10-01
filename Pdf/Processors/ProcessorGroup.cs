@@ -33,7 +33,10 @@ internal class ProcessorGroup
             if (sucess)
                 continue;
             
-            if (_endProcessor is null || !await reader.NextTokenAsync())
+            if (_endProcessor is null)
+                return false;
+
+            if (!await reader.NextTokenAsync())
                 return false;
         }
     }
