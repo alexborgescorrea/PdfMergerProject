@@ -1,6 +1,7 @@
 ﻿using PdfMerger.Pdf.Processors.Types.Arrays;
 using PdfMerger.Pdf.Processors.Types.Dictionaries;
 using PdfMerger.Pdf.Readers;
+using PdfMerger.Pdf.Writers;
 
 namespace PdfMerger.Pdf.Processors.Types;
 
@@ -24,8 +25,8 @@ internal class TypesProcessor : IProcessor
         ]
     );
     
-    public Task<bool> ProcessAsync(PdfContext context, PdfReader2 reader)
+    public Task<bool> ProcessAsync(PdfContext context, PdfReader reader, PdfWriter writer)
     {
-        return ProcessorGroup.ProcessAsync(context, reader);
+        return ProcessorGroup.ProcessAsync(context, reader, writer);
     }
 }

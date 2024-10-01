@@ -1,6 +1,8 @@
 ﻿using PdfMerger.Pdf.Matchers;
+using PdfMerger.Pdf.Matchers.Base;
 using PdfMerger.Pdf.Processors.Types;
 using PdfMerger.Pdf.Readers;
+using PdfMerger.Pdf.Writers;
 
 namespace PdfMerger.Pdf.Processors.Objs;
 
@@ -18,26 +20,40 @@ internal class StartObjProcessor : IProcessor
         EndObjProcessor.Instance
     );
     
-    public async Task<bool> ProcessAsync(PdfContext context, PdfReader2 reader)
+    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, PdfWriter writer)
     {
-        if (!await ProcessInternalAsync(context, reader))
+        if (!await ProcessInternalAsync(context, reader, writer))
             return false;
         
-        return await ProcessorGroup.ProcessAsync(context, reader);
+        return await ProcessorGroup.ProcessAsync(context, reader, writer);
     }
     
-    private async Task<bool> ProcessInternalAsync(PdfContext context, PdfReader2 reader)
+    private async Task<bool> ProcessInternalAsync(PdfContext context, PdfReader reader, PdfWriter writer)
     {
+        var originalPosition = reader.Position;
         var chunk = await reader.ChunkAsync(MaxIdentifierLength);
         var index = StartObjMatcher.Instance.Match(chunk.Span);
         if (index == -1)
             return false;
 
-        if (chunk.Span.StartsWith("\n4028 0 obj"u8.ToArray()))
-            Console.WriteLine("");
+        chunk = chunk[..index];
+        await writer.WriteLineAsync(chunk);
         
-        await context.PdfWriter.WriteLineAsync(chunk[..index]);
-
+        AddReference(context, reader, writer, originalPosition, chunk.Span);
+        
         return await reader.MoveAsync(index);
+    }
+
+    private static void AddReference(PdfContext context, PdfReader reader, PdfWriter writer, long originalPosition, ReadOnlySpan<byte> chunk)
+    {
+        var index = NumberMatcher.Instance.Match(chunk) + 1;
+        var number = int.Parse(chunk[..index]);
+        
+        chunk = chunk[++index..];
+        
+        index = NumberMatcher.Instance.Match(chunk) + 1;
+        var generation = int.Parse(chunk[..index]);
+        
+        context.References.Add(new(number, generation, writer.Position, originalPosition));
     }
 }

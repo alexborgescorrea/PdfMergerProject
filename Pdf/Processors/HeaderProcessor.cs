@@ -1,16 +1,17 @@
 ﻿using PdfMerger.Pdf.Readers;
+using PdfMerger.Pdf.Writers;
 
 namespace PdfMerger.Pdf.Processors;
 
 internal class HeaderProcessor : IProcessor
 {
-    public async Task<bool> ProcessAsync(PdfContext context, PdfReader2 reader)
+    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, PdfWriter writer)
     {
         if (!await reader.FindAndMoveAsync(PdfConstants.PdfHeaderSignature))
             return false;
         
-        await context.PdfWriter.WriteHeaderAsync();
-        await context.PdfWriter.WriteBiStringAsync();
+        await writer.WriteHeaderAsync();
+        await writer.WriteBiStringAsync();
         
         return await reader.NextTokenAsync();
     }

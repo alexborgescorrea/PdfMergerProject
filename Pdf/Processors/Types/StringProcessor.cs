@@ -1,5 +1,6 @@
 ﻿using System.Buffers;
 using PdfMerger.Pdf.Readers;
+using PdfMerger.Pdf.Writers;
 
 namespace PdfMerger.Pdf.Processors.Types;
 
@@ -10,15 +11,15 @@ internal class StringProcessor : IProcessor
     private const byte BackSlashToken = 0x5C;
     private static readonly SearchValues<byte> NextTokensSearchValues = SearchValues.Create([(byte)')', BackSlashToken]);
     
-    public async Task<bool> ProcessAsync(PdfContext context, PdfReader2 reader)
+    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, PdfWriter writer)
     {
         if (reader.Value != '(')
             return false;
         
-        context.PdfWriter.WriteNewLine();
+        writer.WriteNewLine();
         while (true)
         {
-            if (!await context.PdfWriter.WriteAndMoveAtIndexOfAnyAsync(reader, NextTokensSearchValues))
+            if (!await writer.WriteAndMoveAtIndexOfAnyAsync(reader, NextTokensSearchValues))
                 return false;
 
             if (reader.Value == ')')
@@ -27,7 +28,7 @@ internal class StringProcessor : IProcessor
             if (!await reader.MoveAsync(1))
                 return false;
             
-            if (!await context.PdfWriter.CopyAndMovieAsync(reader, 2))
+            if (!await writer.CopyAndMovieAsync(reader, 2))
                 return false;
         }
     }

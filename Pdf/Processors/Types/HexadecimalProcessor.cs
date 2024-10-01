@@ -1,4 +1,5 @@
 ﻿using PdfMerger.Pdf.Readers;
+using PdfMerger.Pdf.Writers;
 
 namespace PdfMerger.Pdf.Processors.Types;
 
@@ -8,7 +9,7 @@ internal class HexadecimalProcessor : IProcessor
     private static readonly byte[] Tokens = [(byte)'<', (byte)'<'];
     private static readonly byte GreaterThanToken = (byte)'>';
     
-    public async Task<bool> ProcessAsync(PdfContext context, PdfReader2 reader)
+    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, PdfWriter writer)
     {
         if (reader.Value != '<')
             return false;
@@ -17,8 +18,8 @@ internal class HexadecimalProcessor : IProcessor
         if (chunk.Span.SequenceEqual(Tokens))
             return false;
 
-        context.PdfWriter.WriteNewLine();
-        return await context.PdfWriter.WriteAndMoveAtIndexOfAsync(reader, GreaterThanToken) && 
+        writer.WriteNewLine();
+        return await writer.WriteAndMoveAtIndexOfAsync(reader, GreaterThanToken) && 
                await reader.NextTokenAsync();
     }
 }

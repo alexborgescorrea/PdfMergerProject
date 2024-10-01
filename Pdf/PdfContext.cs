@@ -4,10 +4,5 @@ namespace PdfMerger.Pdf;
 
 internal class PdfContext
 {
-    public PdfContext(PdfWriter pdfWriter)
-    {
-        PdfWriter = pdfWriter;
-    }
-    
-    public PdfWriter PdfWriter { get; }
+    public List<PdfReference> References { get; } = new(5000);
 }

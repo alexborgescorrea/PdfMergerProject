@@ -1,4 +1,5 @@
 ﻿using PdfMerger.Pdf.Readers;
+using PdfMerger.Pdf.Writers;
 
 namespace PdfMerger.Pdf.Processors.Types.Dictionaries;
 
@@ -8,12 +9,12 @@ internal class EndDictionaryProcessor : IProcessor
     
     private static readonly byte[] Tokens = [(byte)'>', (byte)'>'];
 
-    public async Task<bool> ProcessAsync(PdfContext context, PdfReader2 reader)
+    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, PdfWriter writer)
     {
         var chunk = await reader.ChunkAsync(2);
         if (chunk.Span.SequenceEqual(Tokens) && await reader.MoveAsync(2))
         {
-            await context.PdfWriter.WriteEndDictionaryAsync();
+            await writer.WriteEndDictionaryAsync();
             return true;
         }
 

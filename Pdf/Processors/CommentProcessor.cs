@@ -1,4 +1,5 @@
 ﻿using PdfMerger.Pdf.Readers;
+using PdfMerger.Pdf.Writers;
 
 namespace PdfMerger.Pdf.Processors;
 
@@ -6,7 +7,7 @@ internal class CommentProcessor : IProcessor
 {
     public static CommentProcessor Instance { get; } = new();
 
-    public async Task<bool> ProcessAsync(PdfContext context, PdfReader2 reader)
+    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, PdfWriter writer)
     {
         if (reader.Value != '%')
             return false;

@@ -1,4 +1,5 @@
 ﻿using PdfMerger.Pdf.Readers;
+using PdfMerger.Pdf.Writers;
 
 namespace PdfMerger.Pdf.Processors;
 
@@ -13,14 +14,14 @@ internal class ProcessorGroup
         _endProcessor = endProcessor;
     }
     
-    public async Task<bool> ProcessAsync(PdfContext context, PdfReader2 reader)
+    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, PdfWriter writer)
     {
         while (true)
         {
             var sucess = false;
             foreach (var processor in _processors)
             {
-                sucess = await processor.ProcessAsync(context, reader);
+                sucess = await processor.ProcessAsync(context, reader, writer);
                 if (sucess)
                 {
                     if (_endProcessor is null || processor == _endProcessor)

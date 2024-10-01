@@ -1,5 +1,6 @@
 ﻿using System.Buffers;
 using PdfMerger.Pdf.Readers;
+using PdfMerger.Pdf.Writers;
 
 namespace PdfMerger.Pdf.Processors;
 
@@ -10,7 +11,7 @@ internal class XRefProcessor : IProcessor
     private static readonly byte[] TrailerToken = "trailer"u8.ToArray();
     private static readonly SearchValues<byte> FilterSearchValues = SearchValues.Create([(byte)'t', (byte)'%']);
     
-    public async Task<bool> ProcessAsync(PdfContext context, PdfReader2 reader)
+    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, PdfWriter writer)
     {
         if (!await reader.StartWithAsync(Token))
             return false;

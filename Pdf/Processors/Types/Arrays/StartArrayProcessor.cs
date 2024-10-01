@@ -1,4 +1,5 @@
 ﻿using PdfMerger.Pdf.Readers;
+using PdfMerger.Pdf.Writers;
 
 namespace PdfMerger.Pdf.Processors.Types.Arrays;
 
@@ -15,13 +16,13 @@ internal class StartArrayProcessor : IProcessor
         EndArrayProcessor.Instance
     );
     
-    public async Task<bool> ProcessAsync(PdfContext context, PdfReader2 reader)
+    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, PdfWriter writer)
     {
         if (reader.Value != '[')
             return false;
 
-        await context.PdfWriter.WriteStartArrayAsync();
+        await writer.WriteStartArrayAsync();
         
-        return await reader.NextTokenAsync() && await ProcessorGroup.ProcessAsync(context, reader);
+        return await reader.NextTokenAsync() && await ProcessorGroup.ProcessAsync(context, reader, writer);
     }
 }

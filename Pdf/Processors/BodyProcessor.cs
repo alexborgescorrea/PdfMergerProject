@@ -1,6 +1,7 @@
 ﻿using PdfMerger.Pdf.Processors.Objs;
 using PdfMerger.Pdf.Processors.Types;
 using PdfMerger.Pdf.Readers;
+using PdfMerger.Pdf.Writers;
 
 namespace PdfMerger.Pdf.Processors;
 
@@ -18,8 +19,8 @@ internal class BodyProcessor : IProcessor
         ], 
         XRefProcessor.Instance
     );
-    public Task<bool> ProcessAsync(PdfContext context, PdfReader2 reader)
+    public Task<bool> ProcessAsync(PdfContext context, PdfReader reader, PdfWriter writer)
     {
-        return ProcessorGroup.ProcessAsync(context, reader);
+        return ProcessorGroup.ProcessAsync(context, reader, writer);
     }
 }
