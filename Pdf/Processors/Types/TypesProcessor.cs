@@ -13,11 +13,11 @@ internal class TypesProcessor : IProcessor
     (
         [ 
             ReferenceProcessor.Instance,
-            StartDictionaryProcessor.Instance, 
+            DictionaryProcessor.Instance, 
             NameProcessor.Instance,
             NumberProcessor.Instance,
             StringProcessor.Instance,
-            StartArrayProcessor.Instance,
+            ArrayProcessor.Instance,
             BooleanProcessor.Instance, 
             NullProcessor.Instance,
             StreamProcessor.Instance,
@@ -25,7 +25,7 @@ internal class TypesProcessor : IProcessor
         ]
     );
     
-    public Task<bool> ProcessAsync(PdfContext context, PdfReader reader, PdfWriter writer)
+    public Task<bool> ProcessAsync(PdfContext context, PdfReader reader, IPdfWriter writer)
     {
         return ProcessorGroup.ProcessAsync(context, reader, writer);
     }

@@ -97,7 +97,7 @@ internal class PdfReader
         return _buffer[_currentBufferIndex..endIndex];
     }
 
-    private async Task<bool> NextNonSpaceValueAsync()
+    public async Task<bool> NextNonSpaceValueAsync()
     {
         return await FindAnyExceptAndMoveAsync(SpacesSearchValues);
     }
@@ -173,14 +173,15 @@ internal class PdfReader
         }
     }
     
-    private bool IsSpace() => PdfConstants.Spaces.Contains(Value);
-    public bool IsDelimiterSpaces() => PdfConstants.Delimiters.Contains(Value);
+    public bool IsSpace() => PdfConstants.Spaces.Contains(Value);
+    public bool IsDelimiter() => PdfConstants.Delimiters.Contains(Value);
     private bool IsDelimiterWithoutSpaces() => PdfConstants.DelimitersWithoutSpaces.Contains(Value);
     
     private bool CanMove(int numBytes) => _currentBufferIndex + numBytes < _buffer.Length;
     
     public async Task<bool> ReadNextBytesToBufferAsync(int keepLastBytes = 0)
     {
+        keepLastBytes = Math.Min(keepLastBytes, _buffer.Length);
         if (keepLastBytes > 0 && _buffer.Length > 0)
             _buffer[^keepLastBytes..].CopyTo(_buffer);
         
@@ -211,30 +212,27 @@ internal class PdfReader
         return _buffer.Span[_currentBufferIndex..].IndexOfAny(filter);
     }
 
-    public ValueTask CopyToAndMoveAsync(Stream stream, int index)
+    public async ValueTask<bool> CopyAllBufferToAsync(Stream stream, int startIndex = 0)
     {
-        var startIndex = _currentBufferIndex;
-        _currentBufferIndex += index;
+        if (_buffer.Length == 0)
+            return false;
         
-        return stream.WriteAsync(_buffer[startIndex..(_currentBufferIndex + 1)]);
+        await CopyBufferToAsync(stream, startIndex, _buffer.Length - _currentBufferIndex - startIndex);
+        return true;
     }
     
-    public ValueTask CopyBufferToAsync(Stream stream, int index)
+    public ValueTask CopyBufferToAsync(Stream stream, int startIndex, int count)
     {
-        return stream.WriteAsync(_buffer[_currentBufferIndex..(_currentBufferIndex + index + 1)]);
+        var buffer = _buffer[_currentBufferIndex..];
+        count += startIndex;
+        if (buffer.Length < count)
+            throw new InvalidOperationException("Tamanho do buffer insuficiente para copiar!");
+        
+        if (buffer.Length <= startIndex)
+            throw new InvalidOperationException("Índice inválido para acesso ao buffer!");
+
+        return stream.WriteAsync(buffer[startIndex..count]);
     }
-    
-    public ValueTask CopyAllBufferToAsync(Stream stream)
-    {
-        return stream.WriteAsync(_buffer[_currentBufferIndex..]);
-    }
-    
-    public void MoveBufferTo(int index)
-    {
-        var startIndex = _currentBufferIndex;
-        _currentBufferIndex += index;
-    }
-    
     public string Debug()
     {
         var text = Encoding.UTF8.GetString(_buffer.Span[_currentBufferIndex..]);

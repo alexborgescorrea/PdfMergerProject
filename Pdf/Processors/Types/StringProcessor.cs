@@ -11,7 +11,7 @@ internal class StringProcessor : IProcessor
     private const byte BackSlashToken = 0x5C;
     private static readonly SearchValues<byte> NextTokensSearchValues = SearchValues.Create([(byte)')', BackSlashToken]);
     
-    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, PdfWriter writer)
+    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, IPdfWriter writer)
     {
         if (reader.Value != '(')
             return false;

@@ -1,8 +1,8 @@
-﻿using PdfMerger.Pdf.Writers;
-
-namespace PdfMerger.Pdf;
+﻿namespace PdfMerger.Pdf;
 
 internal class PdfContext
 {
-    public List<PdfReference> References { get; } = new(5000);
+    public PdfReference Root { get; set; }
+    public PdfScope Scope { get; set; }
+    public List<PdfReference> References { get; } = new(100);
 }

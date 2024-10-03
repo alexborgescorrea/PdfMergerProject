@@ -9,7 +9,7 @@ internal class EndDictionaryProcessor : IProcessor
     
     private static readonly byte[] Tokens = [(byte)'>', (byte)'>'];
 
-    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, PdfWriter writer)
+    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, IPdfWriter writer)
     {
         var chunk = await reader.ChunkAsync(2);
         if (chunk.Span.SequenceEqual(Tokens) && await reader.MoveAsync(2))

@@ -14,8 +14,11 @@ internal class ProcessorGroup
         _endProcessor = endProcessor;
     }
     
-    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, PdfWriter writer)
+    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, IPdfWriter writer)
     {
+        if (reader.IsSpace())
+            await reader.NextNonSpaceValueAsync();
+        
         while (true)
         {
             var sucess = false;

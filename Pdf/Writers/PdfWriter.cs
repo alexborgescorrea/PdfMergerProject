@@ -4,7 +4,7 @@ using PdfMerger.Pdf.Readers;
 
 namespace PdfMerger.Pdf.Writers;
 
-internal class PdfWriter
+internal class PdfWriter : IPdfWriter
 {
     private static readonly byte[] PdfHeader = "%PDF-2.0"u8.ToArray();
     private static readonly byte[] BitString = [0x0D, 0x25, 0xE2, 0xE3, 0xCF, 0xD3];
@@ -33,7 +33,7 @@ internal class PdfWriter
         return _stream.WriteAsync(PdfHeader, 0, PdfHeader.Length);
     }
 
-    public Task WriteBiStringAsync()
+    public Task WriteBitStringAsync()
     {
         return _stream.WriteAsync(BitString, 0, BitString.Length);
     }
@@ -89,12 +89,12 @@ internal class PdfWriter
         return _stream.WriteAsync(value == 't' ? TrueValue : FalseValue);
     }
     
-    public ValueTask WriteNullByte()
+    public ValueTask WriteNullByteAsync()
     {
         return _stream.WriteAsync(NullByteValue);
     }
     
-    public ValueTask WriteNull()
+    public ValueTask WriteNullAsync()
     {
         return _stream.WriteAsync(NullValue);
     }
@@ -104,11 +104,10 @@ internal class PdfWriter
         do
         {
             var index = reader.IndexOfDelimiterInBuffer();
-
             if (index != -1)
             {
-                await reader.CopyBufferToAsync(_stream, index - 1);
-                reader.MoveBufferTo(index);
+                await reader.CopyBufferToAsync(_stream, 0, index);
+                await reader.MoveAsync(index);
                 return true;
             }
             
@@ -119,34 +118,40 @@ internal class PdfWriter
         return false;
     }
     
-    public async Task<bool> WriteAndMoveAtIndexOfAsync(PdfReader reader, byte filter)
+    public async Task<bool> WriteAndMoveAtAsync(PdfReader reader, byte filter)
     {
         do
         {
             var index = reader.IndexOfInBuffer(filter);
             if (index != -1)
             {
-                await reader.CopyToAndMoveAsync(_stream, index);
+                await reader.CopyBufferToAsync(_stream, 0, index + 1);
+                await reader.MoveAsync(index);
                 return true;
             }
+
+            await reader.CopyAllBufferToAsync(_stream);
         } 
         while (await reader.ReadNextBytesToBufferAsync());
 
         return false;
     }
     
-    public async Task<bool> WriteAndMoveAtIndexOfAsync(PdfReader reader, Memory<byte> filter)
+    public async Task<bool> WriteAndMoveAtAsync(PdfReader reader, Memory<byte> filter)
     {
+        var indexKeepLastBytes = 0;
         do
         {
             var index = reader.IndexOfInBuffer(filter);
             if (index != -1)
             {
-                await reader.CopyToAndMoveAsync(_stream, index + filter.Length - 1);
+                await reader.CopyBufferToAsync(_stream, indexKeepLastBytes, index + (filter.Length - indexKeepLastBytes));
+                await reader.MoveAsync(index);
                 return true;
             }
-            
-            await reader.CopyAllBufferToAsync(_stream);
+
+            if (await reader.CopyAllBufferToAsync(_stream, indexKeepLastBytes))
+                indexKeepLastBytes = filter.Length;
         } 
         while (await reader.ReadNextBytesToBufferAsync(filter.Length));
 
@@ -160,7 +165,8 @@ internal class PdfWriter
             var index = reader.IndexOfAnyInBuffer(filter);
             if (index != -1)
             {
-                await reader.CopyToAndMoveAsync(_stream, index);
+                await reader.CopyBufferToAsync(_stream, 0, index + 1);
+                await reader.MoveAsync(index);
                 return true;
             }
 
@@ -179,16 +185,30 @@ internal class PdfWriter
         return await reader.MoveAsync(length);
     }
     
-    public async Task WriterReferencesAsync(IReadOnlyList<PdfReference> references)
+    public async Task<long> WriteReferencesAsync(IReadOnlyList<PdfReference> references)
     {
+        var xrefOffset = _stream.Position + 1;
         await WriteAsync(Encoding.ASCII.GetBytes($"\nxref\n0 {references.Count}"));
-        var buffer = new byte[19];
+        await WriteAsync(Encoding.ASCII.GetBytes($"\r\n0000000000 65535 f"));
+        var buffer = new byte[20];
         foreach (var reference in references)
         {
-            var value = $"\n{reference.ObjectNumber.ToString().PadLeft(10, '0')} {reference.GenerationNumber.ToString().PadLeft(5, '0')} n";
+            var value = $"\r\n{reference.ObjectNumber.ToString().PadLeft(10, '0')} {reference.GenerationNumber.ToString().PadLeft(5, '0')} n";
             Encoding.ASCII.GetBytes(value, buffer);
             await _stream.WriteAsync(buffer);
         }
+
+        return xrefOffset;
+    }
+
+    public ValueTask WriterTrailerAsync(PdfReference root, IReadOnlyList<PdfReference> references)
+    {
+        return WriteAsync(Encoding.ASCII.GetBytes($"\ntrailer\n<</Root {root}/Size {references.Count + 1}>>"));
+    }
+    
+    public ValueTask WriteStartXRefAsync(long xrefOffset)
+    {
+        return WriteAsync(Encoding.ASCII.GetBytes($"\nstartxref\n{xrefOffset}\n%%EOF"));
     }
     
     public Task FlushAsync()

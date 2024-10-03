@@ -1,7 +1,7 @@
 ﻿using PdfMerger.Pdf.Readers;
 using PdfMerger.Pdf.Writers;
 
-namespace PdfMerger.Pdf.Processors;
+namespace PdfMerger.Pdf.Processors.Footer;
 
 internal class StartXRefProcessor : IProcessor
 {
@@ -9,7 +9,7 @@ internal class StartXRefProcessor : IProcessor
     private static readonly byte[] StartXrefToken = "startxref"u8.ToArray();
     private static readonly byte[] EofToken = "%%EOF"u8.ToArray();
     
-    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, PdfWriter writer)
+    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, IPdfWriter writer)
     {
         if (!await reader.StartWithAsync(StartXrefToken))
             return false;

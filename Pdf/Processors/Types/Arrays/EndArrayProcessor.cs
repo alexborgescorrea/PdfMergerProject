@@ -7,7 +7,7 @@ internal class EndArrayProcessor : IProcessor
 {
     public static readonly EndArrayProcessor Instance = new();
     
-    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, PdfWriter writer)
+    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, IPdfWriter writer)
     {
         if (reader.Value != ']')
             return false;

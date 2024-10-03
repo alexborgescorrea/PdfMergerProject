@@ -7,15 +7,17 @@ namespace PdfMerger.Pdf.Processors;
 internal class PdfProcessor
 {
     private readonly HeaderProcessor _headerProcessor = new();
-    private readonly BodyProcessor _bodyProcessor = new(); 
+    private readonly FileProcessor _fileProcessor = new(); 
         
-    public async Task ProcessAsync(PdfContext context, PdfReader reader, PdfWriter writer)
+    public async Task ProcessAsync(PdfContext context, PdfReader reader, IPdfWriter writer)
     {
         if (!await _headerProcessor.ProcessAsync(context, reader, writer))
             ThrowHelper.ThrowInvalidPdf();
         
-        await _bodyProcessor.ProcessAsync(context, reader, writer);
-        await writer.WriterReferencesAsync(context.References);
+        await _fileProcessor.ProcessAsync(context, reader, writer);
+        var xrefOffset = await writer.WriteReferencesAsync(context.References);
+        await writer.WriterTrailerAsync(context.Root, context.References);
+        await writer.WriteStartXRefAsync(xrefOffset);
         await writer.FlushAsync();
     }
 }

@@ -6,9 +6,9 @@ using PdfMerger.Pdf.Writers;
 
 namespace PdfMerger.Pdf.Processors.Objs;
 
-internal class StartObjProcessor : IProcessor
+internal class ObjProcessor : IProcessor
 {
-    public static readonly StartObjProcessor Instance = new();
+    public static readonly ObjProcessor Instance = new();
     private const int MaxIdentifierLength = 255;
     private static readonly ProcessorGroup ProcessorGroup = new 
     (
@@ -20,15 +20,19 @@ internal class StartObjProcessor : IProcessor
         EndObjProcessor.Instance
     );
     
-    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, PdfWriter writer)
+    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, IPdfWriter writer)
     {
         if (!await ProcessInternalAsync(context, reader, writer))
             return false;
         
-        return await ProcessorGroup.ProcessAsync(context, reader, writer);
+        var scope = context.Scope;
+        var result = await ProcessorGroup.ProcessAsync(context, reader, writer);
+        UpdateContext(context);
+        context.Scope = scope;
+        return result;
     }
     
-    private async Task<bool> ProcessInternalAsync(PdfContext context, PdfReader reader, PdfWriter writer)
+    private async Task<bool> ProcessInternalAsync(PdfContext context, PdfReader reader, IPdfWriter writer)
     {
         var originalPosition = reader.Position;
         var chunk = await reader.ChunkAsync(MaxIdentifierLength);
@@ -44,7 +48,7 @@ internal class StartObjProcessor : IProcessor
         return await reader.MoveAsync(index);
     }
 
-    private static void AddReference(PdfContext context, PdfReader reader, PdfWriter writer, long originalPosition, ReadOnlySpan<byte> chunk)
+    private static void AddReference(PdfContext context, PdfReader reader, IPdfWriter writer, long originalPosition, ReadOnlySpan<byte> chunk)
     {
         var index = NumberMatcher.Instance.Match(chunk) + 1;
         var number = int.Parse(chunk[..index]);
@@ -55,5 +59,11 @@ internal class StartObjProcessor : IProcessor
         var generation = int.Parse(chunk[..index]);
         
         context.References.Add(new(number, generation, writer.Position, originalPosition));
+    }
+
+    private static void UpdateContext(PdfContext context)
+    {
+        if (context.Scope.IsCatalog)
+            context.Root = context.References[^1];
     }
 }
