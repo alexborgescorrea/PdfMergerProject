@@ -18,7 +18,7 @@ internal class DictionaryProcessor : IProcessor
     );
     private static readonly byte[] Tokens = [(byte)'<', (byte)'<'];
     
-    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, IPdfWriter writer)
+    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, PdfWriter writer)
     {
         if (await reader.StartWithAsync(Tokens) && await reader.MoveAsync(2))
         {

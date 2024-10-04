@@ -4,7 +4,7 @@ using PdfMerger.Pdf.Processors;using PdfMerger.Pdf.Writers;
 
 const string basePath = @"C:\Desenv\Pessoal\PdfMergerProject\Samples\";
 var referencesPath = Path.Combine(basePath, "referencias.json");
-var sourcePath1 = Path.Combine(basePath, "ISO_32000-2_sponsored-ec2.pdf");
+var sourcePath1 = Path.Combine(basePath, "Fitness Tip 4.pdf");
 var sourcePath2 = Path.Combine(basePath, "teste.pdf");
 var destinationPath = Path.Combine(basePath, "resultado.pdf");
 

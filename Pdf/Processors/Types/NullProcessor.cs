@@ -8,7 +8,7 @@ internal class NullProcessor : IProcessor
 {
     public static readonly NullProcessor Instance = new();
     
-    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, IPdfWriter writer)
+    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, PdfWriter writer)
     {
         if (reader.Value == 0)
             return await reader.MoveAsync(1);

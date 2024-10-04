@@ -9,7 +9,7 @@ internal class StartXRefProcessor : IProcessor
     private static readonly byte[] StartXrefToken = "startxref"u8.ToArray();
     private static readonly byte[] EofToken = "%%EOF"u8.ToArray();
     
-    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, IPdfWriter writer)
+    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, PdfWriter writer)
     {
         if (!await reader.StartWithAsync(StartXrefToken))
             return false;

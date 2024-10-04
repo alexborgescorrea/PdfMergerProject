@@ -5,7 +5,7 @@ namespace PdfMerger.Pdf.Processors;
 
 internal class HeaderProcessor : IProcessor
 {
-    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, IPdfWriter writer)
+    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, PdfWriter writer)
     {
         if (!await reader.FindAndMoveAsync(PdfConstants.PdfHeaderSignature))
             return false;

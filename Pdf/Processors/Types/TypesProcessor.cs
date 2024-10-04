@@ -25,7 +25,7 @@ internal class TypesProcessor : IProcessor
         ]
     );
     
-    public Task<bool> ProcessAsync(PdfContext context, PdfReader reader, IPdfWriter writer)
+    public Task<bool> ProcessAsync(PdfContext context, PdfReader reader, PdfWriter writer)
     {
         return ProcessorGroup.ProcessAsync(context, reader, writer);
     }

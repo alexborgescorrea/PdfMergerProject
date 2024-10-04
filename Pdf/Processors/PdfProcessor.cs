@@ -9,7 +9,7 @@ internal class PdfProcessor
     private readonly HeaderProcessor _headerProcessor = new();
     private readonly FileProcessor _fileProcessor = new(); 
         
-    public async Task ProcessAsync(PdfContext context, PdfReader reader, IPdfWriter writer)
+    public async Task ProcessAsync(PdfContext context, PdfReader reader, PdfWriter writer)
     {
         if (!await _headerProcessor.ProcessAsync(context, reader, writer))
             ThrowHelper.ThrowInvalidPdf();

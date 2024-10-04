@@ -20,7 +20,7 @@ internal class ObjProcessor : IProcessor
         EndObjProcessor.Instance
     );
     
-    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, IPdfWriter writer)
+    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, PdfWriter writer)
     {
         if (!await ProcessInternalAsync(context, reader, writer))
             return false;
@@ -32,7 +32,7 @@ internal class ObjProcessor : IProcessor
         return result;
     }
     
-    private async Task<bool> ProcessInternalAsync(PdfContext context, PdfReader reader, IPdfWriter writer)
+    private async Task<bool> ProcessInternalAsync(PdfContext context, PdfReader reader, PdfWriter writer)
     {
         var originalPosition = reader.Position;
         var chunk = await reader.ChunkAsync(MaxIdentifierLength);
@@ -43,12 +43,12 @@ internal class ObjProcessor : IProcessor
         chunk = chunk[..index];
         await writer.WriteLineAsync(chunk);
         
-        AddReference(context, reader, writer, originalPosition, chunk.Span);
+        AddReference(context, writer, originalPosition, chunk.Span);
         
         return await reader.MoveAsync(index);
     }
 
-    private static void AddReference(PdfContext context, PdfReader reader, IPdfWriter writer, long originalPosition, ReadOnlySpan<byte> chunk)
+    private static void AddReference(PdfContext context, PdfWriter writer, long originalPosition, ReadOnlySpan<byte> chunk)
     {
         var index = NumberMatcher.Instance.Match(chunk) + 1;
         var number = int.Parse(chunk[..index]);
@@ -63,7 +63,10 @@ internal class ObjProcessor : IProcessor
 
     private static void UpdateContext(PdfContext context)
     {
-        if (context.Scope.IsCatalog)
-            context.Root = context.References[^1];
+        if (!context.Scope.IsCatalogType)
+            return;
+        
+        context.Root = context.References[^1];
+        context.Pages.Add(context.Scope.Pages);
     }
 }

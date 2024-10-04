@@ -16,7 +16,7 @@ internal class TrailerProcessor : IProcessor
         DictionaryProcessor.Instance
     );
     
-    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, IPdfWriter writer)
+    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, PdfWriter writer)
     {
         return await reader.NextTokenAsync() &&
                await ProcessorGroup.ProcessAsync(context, reader, writer);

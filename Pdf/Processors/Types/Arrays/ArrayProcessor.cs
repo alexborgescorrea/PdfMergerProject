@@ -16,7 +16,7 @@ internal class ArrayProcessor : IProcessor
         EndArrayProcessor.Instance
     );
     
-    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, IPdfWriter writer)
+    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, PdfWriter writer)
     {
         if (reader.Value != '[')
             return false;

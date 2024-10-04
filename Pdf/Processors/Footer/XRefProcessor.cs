@@ -9,7 +9,7 @@ internal class XRefProcessor : IProcessor
     private static readonly byte[] Token = "xref"u8.ToArray();
     private static readonly byte[] TrailerToken = "trailer"u8.ToArray();
     
-    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, IPdfWriter writer)
+    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, PdfWriter writer)
     {
         if (!await reader.StartWithAsync(Token))
             return false;

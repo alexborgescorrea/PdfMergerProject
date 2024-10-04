@@ -9,7 +9,7 @@ internal class HexadecimalProcessor : IProcessor
     private static readonly byte[] Tokens = [(byte)'<', (byte)'<'];
     private static readonly byte GreaterThanToken = (byte)'>';
     
-    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, IPdfWriter writer)
+    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, PdfWriter writer)
     {
         if (reader.Value != '<')
             return false;

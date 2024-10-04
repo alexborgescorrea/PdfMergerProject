@@ -20,7 +20,7 @@ internal class FileProcessor : IProcessor
         ], 
         XRefProcessor.Instance
     );
-    public Task<bool> ProcessAsync(PdfContext context, PdfReader reader, IPdfWriter writer)
+    public Task<bool> ProcessAsync(PdfContext context, PdfReader reader, PdfWriter writer)
     {
         return ProcessorGroup.ProcessAsync(context, reader, writer);
     }

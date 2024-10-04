@@ -4,7 +4,7 @@ using PdfMerger.Pdf.Readers;
 
 namespace PdfMerger.Pdf.Writers;
 
-internal class PdfWriter : IPdfWriter
+internal class PdfWriter
 {
     private static readonly byte[] PdfHeader = "%PDF-2.0"u8.ToArray();
     private static readonly byte[] BitString = [0x0D, 0x25, 0xE2, 0xE3, 0xCF, 0xD3];

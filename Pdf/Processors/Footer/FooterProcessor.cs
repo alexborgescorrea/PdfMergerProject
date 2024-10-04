@@ -16,7 +16,7 @@ internal class FooterProcessor : IProcessor
     
     private readonly PdfWriter _dummyWriter = new(new DummyStream());
     
-    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, IPdfWriter writer)
+    public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, PdfWriter writer)
     {
         if (!await XRefProcessor.Instance.ProcessAsync(context, reader, writer))
             return false;
