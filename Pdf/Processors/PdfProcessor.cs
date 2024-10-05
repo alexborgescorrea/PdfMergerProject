@@ -1,5 +1,6 @@
 ﻿using PdfMerger.Exceptions;
 using PdfMerger.Pdf.Readers;
+using PdfMerger.Pdf.Structs;
 using PdfMerger.Pdf.Writers;
 
 namespace PdfMerger.Pdf.Processors;
@@ -15,6 +16,9 @@ internal class PdfProcessor
             ThrowHelper.ThrowInvalidPdf();
         
         await _fileProcessor.ProcessAsync(context, reader, writer);
+        var mainCatalog = context.Catalogs.First();
+        var objCatalog = await writer.WriteObjCatalogAsync(mainCatalog);
+        context.References.Add(objCatalog);
         var xrefOffset = await writer.WriteReferencesAsync(context.References);
         await writer.WriterTrailerAsync(context.Root, context.References);
         await writer.WriteStartXRefAsync(xrefOffset);

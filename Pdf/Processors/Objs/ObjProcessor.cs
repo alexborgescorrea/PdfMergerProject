@@ -58,7 +58,7 @@ internal class ObjProcessor : IProcessor
         index = NumberMatcher.Instance.Match(chunk) + 1;
         var generation = int.Parse(chunk[..index]);
         
-        context.References.Add(new(number, generation, writer.Position, originalPosition));
+        context.References.Add(new(new(number, generation), writer.Position, originalPosition));
     }
 
     private static void UpdateContext(PdfContext context)
@@ -66,7 +66,12 @@ internal class ObjProcessor : IProcessor
         if (!context.Scope.IsCatalogType)
             return;
         
-        context.Root = context.References[^1];
-        context.Pages.Add(context.Scope.Pages);
+        var reference = context.References[^1];
+        context.Root = reference;
+        context.Catalogs.Add(new()
+        {
+            Obj = reference.Obj,
+            Pages = context.Scope.Pages
+        });
     }
 }

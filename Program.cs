@@ -2,15 +2,14 @@
 using PdfMerger.Pdf;
 using PdfMerger.Pdf.Processors;using PdfMerger.Pdf.Writers;
 
-const string basePath = @"C:\Desenv\Pessoal\PdfMergerProject\Samples\";
+const string basePath = @"C:\Users\paula.mattos\Desktop\Teste\PdfMergerProject\Samples";
 var referencesPath = Path.Combine(basePath, "referencias.json");
-var sourcePath1 = Path.Combine(basePath, "Fitness Tip 4.pdf");
+var sourcePath1 = Path.Combine(basePath, "30150625-criacao-de-pdf-a.pdf");
 var sourcePath2 = Path.Combine(basePath, "teste.pdf");
 var destinationPath = Path.Combine(basePath, "resultado.pdf");
 
 await using var referencesStream = new FileStream(referencesPath, FileMode.Truncate, FileAccess.Write);
 await using var sourceStream1 = new FileStream(sourcePath1, FileMode.Open, FileAccess.Read);
-await using var sourceStream2 = new FileStream(sourcePath2, FileMode.Open, FileAccess.Read);
 await using var destinationStream = File.Exists(destinationPath) ? new FileStream(destinationPath, FileMode.Truncate, FileAccess.ReadWrite) 
                                                                  : new FileStream(destinationPath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
 
@@ -19,11 +18,11 @@ await new PdfProcessor().ProcessAsync(context, new(sourceStream1), new PdfWriter
 
 await JsonSerializer.SerializeAsync(referencesStream, context.References, new JsonSerializerOptions { WriteIndented = true });
 
-await using var stream1 = await RemoverEspacosAsync(sourceStream1);
-await AdicionarEnterAsync(stream1);
+//await using var stream1 = await RemoverEspacosAsync(sourceStream1);
+//await AdicionarEnterAsync(stream1);
 
-await using var stream2 = await RemoverEspacosAsync(destinationStream);
-await AdicionarEnterAsync(stream2);
+//await using var stream2 = await RemoverEspacosAsync(destinationStream);
+//await AdicionarEnterAsync(stream2);
 
 Console.WriteLine("Finalizado!!!!");
 

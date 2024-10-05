@@ -1,4 +1,6 @@
-﻿namespace PdfMerger.Pdf;
+﻿using PdfMerger.Pdf.Structs;
+
+namespace PdfMerger.Pdf;
 
 internal readonly record struct PdfScope
 {
