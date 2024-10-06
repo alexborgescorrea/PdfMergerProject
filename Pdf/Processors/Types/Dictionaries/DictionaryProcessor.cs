@@ -1,4 +1,5 @@
 ﻿using PdfMerger.Pdf.Readers;
+using PdfMerger.Pdf.Structs;
 using PdfMerger.Pdf.Writers;
 
 namespace PdfMerger.Pdf.Processors.Types.Dictionaries;
@@ -25,9 +26,9 @@ internal class DictionaryProcessor : IProcessor
             await writer.WriteStartDictionaryAsync();
             
             context.Scope = context.Scope with { Level = context.Scope.Level + 1 };
-            var result = await ProcessorGroup.ProcessAsync(context, reader, writer);
-            context.Scope = context.Scope with { Level = context.Scope.Level - 1 };
-            
+            var result = await ProcessorGroup.ProcessAsync(context, reader, writer);            
+            context.Scope = context.Scope with { Level = context.Scope.Level - 1 };           
+
             return result;
         }
 

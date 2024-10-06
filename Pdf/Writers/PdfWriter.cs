@@ -8,7 +8,7 @@ namespace PdfMerger.Pdf.Writers;
 internal class PdfWriter
 {
     private static readonly byte[] PdfHeader = "%PDF-2.0"u8.ToArray();
-    private static readonly byte[] BitString = [0x0D, 0x25, 0xE2, 0xE3, 0xCF, 0xD3];
+    private static readonly byte[] BitString = [0x0D, 0x25, 0xE2, 0xE3, 0xCF, 0xD3];    
     private static readonly byte[] EndObj = "\nendobj"u8.ToArray();
     private static readonly byte[] StartDictionary = "\n<<"u8.ToArray();
     private static readonly byte[] EndDictionary = "\n>>"u8.ToArray();
@@ -18,15 +18,17 @@ internal class PdfWriter
     private static readonly byte[] TrueValue = " true"u8.ToArray();
     private static readonly byte[] FalseValue = " false"u8.ToArray();
     private static readonly byte[] NullValue = " null"u8.ToArray();
-    private static readonly byte[] NullByteValue = [0x20, 0];
-    
+    private static readonly byte[] NullByteValue = [0x20, 0];    
+
     private readonly Stream _stream;
     private readonly CatalogWriter _catalogWriter;
+    private readonly PagesWriter _pagesWriter;
 
     public PdfWriter(Stream stream)
     {
         _stream = stream;
         _catalogWriter = new(stream);
+        _pagesWriter = new(stream);
     }
 
     public long Position => _stream.Position;
@@ -45,13 +47,25 @@ internal class PdfWriter
     {
         _stream.WriteByte(PdfConstants.NewLine);
     }
-    
+
+    public async ValueTask WriteStartObjAsync(PdfReferenceValue obj)
+    {
+        WriteNewLine();
+        await WriteAsync(obj.GetObjBytes());
+    }
+
     public ValueTask WriteLineAsync(ReadOnlyMemory<byte> bytes)
     {
         WriteNewLine();
         return WriteAsync(bytes);
     }
-    
+
+    public ValueTask WriteReferenceValueAsync(PdfReferenceValue reference)
+    {
+        WriteNewLine();
+        return WriteAsync(reference.GetReferenceBytes());
+    }
+
     public ValueTask WriteAsync(ReadOnlyMemory<byte> bytes)
     {
         return _stream.WriteAsync(bytes);
@@ -186,8 +200,8 @@ internal class PdfWriter
         await WriteAsync(chunk);
 
         return await reader.MoveAsync(length);
-    }
-    
+    } 
+
     public async Task<long> WriteReferencesAsync(IReadOnlyList<PdfXRefItem> references)
     {
         var xrefOffset = _stream.Position + 1;
@@ -204,9 +218,9 @@ internal class PdfWriter
         return xrefOffset;
     }
 
-    public ValueTask WriterTrailerAsync(PdfXRefItem root, IReadOnlyList<PdfXRefItem> references)
+    public ValueTask WriterTrailerAsync(IReadOnlyList<PdfXRefItem> references)
     {
-        return WriteAsync(Encoding.ASCII.GetBytes($"\ntrailer\n<</Root {root}/Size {references.Count + 1}>>"));
+        return WriteAsync(Encoding.ASCII.GetBytes($"\ntrailer\n<</Root 1 0 R/Size {references.Count + 1}>>"));
     }
     
     public ValueTask WriteStartXRefAsync(long xrefOffset)
@@ -214,9 +228,19 @@ internal class PdfWriter
         return WriteAsync(Encoding.ASCII.GetBytes($"\nstartxref\n{xrefOffset}\n%%EOF"));
     }
 
-    public ValueTask<PdfXRefItem> WriteObjCatalogAsync(PdfCatalog catalog)
+    public ValueTask<PdfXRefItem> WriteObjPagesAsync(PdfContext context, PdfCatalog catalog)
     {
-        return _catalogWriter.WriteObjCatalogAsync(catalog);
+        return _pagesWriter.WriteObjPagesAsync(context, catalog);
+    }
+
+    public ValueTask WritePagesParent()
+    {
+        return _pagesWriter.WritePagesParentAsync();
+    }
+
+    public ValueTask<PdfXRefItem> WriteObjCatalogAsync()
+    {
+        return _catalogWriter.WriteObjCatalogAsync();
     }
 
     public Task FlushAsync()

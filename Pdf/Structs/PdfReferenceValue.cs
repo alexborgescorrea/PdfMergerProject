@@ -1,18 +1,42 @@
 ﻿using System.IO;
+using System.Numerics;
 
 namespace PdfMerger.Pdf.Structs;
 
 internal readonly record struct PdfReferenceValue(int Number, int Generation)
 {
     public override string ToString() => $"{Number} {Generation} R";
-    public byte[] ToArray() 
+    public byte[] GetReferenceBytes()
+    {
+        Span<byte> referenceBytes = stackalloc byte[23];
+        var currentIndex = ReadBytes(referenceBytes);
+
+        referenceBytes[currentIndex++] = (byte)' ';
+        referenceBytes[currentIndex++] = (byte)'R';
+
+        return referenceBytes[..currentIndex].ToArray();
+    }
+
+    public byte[] GetObjBytes()
+    {
+        Span<byte> referenceBytes = stackalloc byte[26];
+        var currentIndex = ReadBytes(referenceBytes);
+
+        referenceBytes[currentIndex++] = (byte)' ';
+        referenceBytes[currentIndex++] = (byte)'o';
+        referenceBytes[currentIndex++] = (byte)'b';
+        referenceBytes[currentIndex++] = (byte)'j';
+
+        return referenceBytes[..currentIndex].ToArray();
+    }
+
+    public int ReadBytes(Span<byte> referenceBytes)
     {
         var currentIndex = 0;
         Span<byte> bytes = stackalloc byte[10];
         if (!Number.TryFormat(bytes, out int bytesWritten))
             throw new InvalidOperationException("Failed to write reference number");
-
-        Span<byte> referenceBytes = stackalloc byte[23];
+        
         bytes[..bytesWritten].CopyTo(referenceBytes);
 
         currentIndex = bytesWritten;
@@ -23,10 +47,15 @@ internal readonly record struct PdfReferenceValue(int Number, int Generation)
 
         bytes[..bytesWritten].CopyTo(referenceBytes[currentIndex++..]);
 
-        referenceBytes[currentIndex++] = (byte)' ';
-        referenceBytes[currentIndex++] = (byte)'R';
+        return currentIndex;
+    }
 
-        return referenceBytes[..currentIndex].ToArray();
+    public static PdfReferenceValue operator +(PdfReferenceValue reference, int number)
+    {
+        return reference with
+        {
+            Number = reference.Number + number
+        };
     }
 
 }

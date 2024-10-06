@@ -1,4 +1,5 @@
 ﻿using PdfMerger.Pdf.Readers;
+using PdfMerger.Pdf.Structs;
 using PdfMerger.Pdf.Writers;
 
 namespace PdfMerger.Pdf.Processors.Types;
@@ -7,7 +8,9 @@ internal class NameProcessor : IProcessor
 {
     public static readonly NameProcessor Instance = new();
     private static readonly byte[] CatalogToken = "Catalog"u8.ToArray();
-    
+    private static readonly byte[] PagesToken = "Pages"u8.ToArray();
+    private static readonly byte[] PageToken = "Page"u8.ToArray();
+
     public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, PdfWriter writer)
     {
         if (reader.Value != '/')
@@ -24,10 +27,27 @@ internal class NameProcessor : IProcessor
 
     private async Task UpdateContext(PdfContext context, PdfReader reader)
     {
-        if (context.Scope.IsTypeKey && context.Scope.Level == 1 && await reader.StartWithAsync(CatalogToken))
-        {
-            context.Scope = context.Scope with { IsCatalogType = true };
+        if (context.Scope.Level != 1)
             return;
-        }
+
+        if (!context.Scope.IsTypeKey)
+            return;
+
+        var objType = await ResolveObjTypeAsync(reader);
+        context.Scope = context.Scope with { ObjType = objType };
+    }
+
+    private static async Task<ObjType> ResolveObjTypeAsync(PdfReader reader)
+    {
+        if (await reader.StartWithAsync(CatalogToken))
+            return ObjType.Catalog;
+
+        if (await reader.StartWithAsync(PagesToken))
+            return ObjType.Pages;
+
+        if (await reader.StartWithAsync(PageToken))
+            return ObjType.Page;
+
+        return ObjType.None;
     }
 }

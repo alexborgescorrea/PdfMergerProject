@@ -1,4 +1,5 @@
 ﻿using PdfMerger.Pdf.Readers;
+using PdfMerger.Pdf.Structs;
 using PdfMerger.Pdf.Writers;
 
 namespace PdfMerger.Pdf.Processors.Types;
@@ -15,7 +16,9 @@ internal class KeyProcessor : IProcessor
     );
     private static readonly byte[] TypeToken = "Type"u8.ToArray();
     private static readonly byte[] PagesToken = "Pages"u8.ToArray();
-    
+    private static readonly byte[] PageToken = "Page"u8.ToArray();
+    private static readonly byte[] ParentToken = "Parent"u8.ToArray();    
+
     public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, PdfWriter writer)
     {
         if (reader.Value != '/')
@@ -37,33 +40,41 @@ internal class KeyProcessor : IProcessor
     
     private async Task UpdateContext(PdfContext context, PdfReader reader)
     {
+        var keyName = await ResolveKeyNameAsync(context, reader);
+        context.Scope = context.Scope with
+        {
+            KeyName = keyName
+        };
+
+        if (context.Scope.KeyName == KeyName.PagesParent)
+            context.Scope = context.Scope with { HasPagesParent = true };
+    }
+
+    private static async Task<KeyName> ResolveKeyNameAsync(PdfContext context, PdfReader reader)
+    {
+        if (context.Scope.Level != 1)
+            return KeyName.None;
+
         if (await reader.StartWithAsync(TypeToken))
-        {
-            context.Scope = context.Scope with
-            {
-                IsTypeKey = true,
-                IsPagesType = false
-            };
-            return;
-        }
-        
+            return KeyName.Type;
+
         if (await reader.StartWithAsync(PagesToken))
-        {
-            context.Scope = context.Scope with
-            {
-                IsTypeKey = false,
-                IsPagesType = true,
-            };
-            return;
-        }
+            return KeyName.Pages;
+
+        if (await reader.StartWithAsync(PageToken))
+            return KeyName.Page;
+
+        if (await reader.StartWithAsync(ParentToken))
+            return KeyName.PagesParent;        
+
+        return KeyName.None;
     }
 
     private void ResetContext(PdfContext context)
     {
         context.Scope = context.Scope with
         {
-            IsTypeKey = false,
-            IsPagesType = false
+            KeyName = KeyName.None
         };
     }
 }

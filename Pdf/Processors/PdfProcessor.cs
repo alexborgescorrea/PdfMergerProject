@@ -17,10 +17,12 @@ internal class PdfProcessor
         
         await _fileProcessor.ProcessAsync(context, reader, writer);
         var mainCatalog = context.Catalogs.First();
-        var objCatalog = await writer.WriteObjCatalogAsync(mainCatalog);
-        context.References.Add(objCatalog);
+        var pagesXRefItem = await writer.WriteObjPagesAsync(context, mainCatalog);
+        var catalogXRefItem = await writer.WriteObjCatalogAsync();
+        context.References.Add(pagesXRefItem);
+        context.References.Add(catalogXRefItem);
         var xrefOffset = await writer.WriteReferencesAsync(context.References);
-        await writer.WriterTrailerAsync(context.Root, context.References);
+        await writer.WriterTrailerAsync(context.References);
         await writer.WriteStartXRefAsync(xrefOffset);
         await writer.FlushAsync();
     }

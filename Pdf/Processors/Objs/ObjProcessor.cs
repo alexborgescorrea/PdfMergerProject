@@ -2,6 +2,7 @@
 using PdfMerger.Pdf.Matchers.Base;
 using PdfMerger.Pdf.Processors.Types;
 using PdfMerger.Pdf.Readers;
+using PdfMerger.Pdf.Structs;
 using PdfMerger.Pdf.Writers;
 
 namespace PdfMerger.Pdf.Processors.Objs;
@@ -27,11 +28,11 @@ internal class ObjProcessor : IProcessor
         
         var scope = context.Scope;
         var result = await ProcessorGroup.ProcessAsync(context, reader, writer);
-        UpdateContext(context);
+        UpdateContext(context);        
         context.Scope = scope;
         return result;
-    }
-    
+    }    
+
     private async Task<bool> ProcessInternalAsync(PdfContext context, PdfReader reader, PdfWriter writer)
     {
         var originalPosition = reader.Position;
@@ -41,31 +42,29 @@ internal class ObjProcessor : IProcessor
             return false;
 
         chunk = chunk[..index];
-        await writer.WriteLineAsync(chunk);
-        
-        AddReference(context, writer, originalPosition, chunk.Span);
-        
+        var obj = chunk.ExtractValueReference() + context.BaseReference;
+        await writer.WriteStartObjAsync(obj);
+
+        context.References.Add(new(obj, writer.Position, originalPosition));
+
         return await reader.MoveAsync(index);
     }
 
-    private static void AddReference(PdfContext context, PdfWriter writer, long originalPosition, ReadOnlySpan<byte> chunk)
-    {
-        var index = NumberMatcher.Instance.Match(chunk) + 1;
-        var number = int.Parse(chunk[..index]);
-        
-        chunk = chunk[++index..];
-        
-        index = NumberMatcher.Instance.Match(chunk) + 1;
-        var generation = int.Parse(chunk[..index]);
-        
-        context.References.Add(new(new(number, generation), writer.Position, originalPosition));
+    private static void AddReference(PdfContext context, PdfWriter writer, long originalPosition, PdfReferenceValue reference)
+    {        
     }
 
     private static void UpdateContext(PdfContext context)
     {
-        if (!context.Scope.IsCatalogType)
+        UpdateCatalogContext(context);
+        UpdatePageCountContext(context);
+    }
+
+    private static void UpdateCatalogContext(PdfContext context)
+    {
+        if (context.Scope.ObjType != ObjType.Catalog)
             return;
-        
+
         var reference = context.References[^1];
         context.Root = reference;
         context.Catalogs.Add(new()
@@ -73,5 +72,13 @@ internal class ObjProcessor : IProcessor
             Obj = reference.Obj,
             Pages = context.Scope.Pages
         });
+    }
+
+    private static void UpdatePageCountContext(PdfContext context)
+    {
+        if (context.Scope.ObjType != ObjType.Page)
+            return;
+
+        context.PagesCount++;
     }
 }
