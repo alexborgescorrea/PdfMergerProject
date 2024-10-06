@@ -228,9 +228,9 @@ internal class PdfWriter
         return WriteAsync(Encoding.ASCII.GetBytes($"\nstartxref\n{xrefOffset}\n%%EOF"));
     }
 
-    public ValueTask<PdfXRefItem> WriteObjPagesAsync(PdfContext context, PdfCatalog catalog)
+    public ValueTask<PdfXRefItem> WriteObjPagesAsync(PdfContext context)
     {
-        return _pagesWriter.WriteObjPagesAsync(context, catalog);
+        return _pagesWriter.WriteObjPagesAsync(context);
     }
 
     public ValueTask WritePagesParent()

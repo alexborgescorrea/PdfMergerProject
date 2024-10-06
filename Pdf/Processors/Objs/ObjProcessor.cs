@@ -42,10 +42,14 @@ internal class ObjProcessor : IProcessor
             return false;
 
         chunk = chunk[..index];
-        var obj = chunk.ExtractValueReference() + context.BaseReference;
+        var obj = chunk.ExtractValueReference();
+        if (obj.Number > context.LargestObjNumer)
+            context.LargestObjNumer = obj.Number;
+
+        obj += context.BaseReference;
         await writer.WriteStartObjAsync(obj);
 
-        context.References.Add(new(obj, writer.Position, originalPosition));
+        context.References.Add(new(obj, writer.Position, originalPosition));        
 
         return await reader.MoveAsync(index);
     }

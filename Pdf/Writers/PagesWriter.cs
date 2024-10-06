@@ -22,11 +22,17 @@ namespace PdfMerger.Pdf.Writers
             _stream = stream;
         }
 
-        public async ValueTask<PdfXRefItem> WriteObjPagesAsync(PdfContext context, PdfCatalog catalog)
+        public async ValueTask<PdfXRefItem> WriteObjPagesAsync(PdfContext context)
         {            
             var position = _stream.Position + 1;
             await _stream.WriteAsync(StartObjPages);
-            await _stream.WriteAsync(catalog.Pages.GetReferenceBytes());
+
+            foreach (var catalog in context.Catalogs)
+            {
+                await _stream.WriteAsync(catalog.Pages.GetReferenceBytes());
+                _stream.WriteByte((byte)' ');
+            }
+
             await _stream.WriteAsync(CountPages);
             await WritePagesCount(context);
             await _stream.WriteAsync(EndObjPages);

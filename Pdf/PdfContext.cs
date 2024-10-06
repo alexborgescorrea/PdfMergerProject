@@ -4,6 +4,7 @@ namespace PdfMerger.Pdf;
 
 internal class PdfContext
 {
+    public int LargestObjNumer { get; set; }
     public int BaseReference { get; set; } = 2;
     public PdfXRefItem Root { get; set; }
     public PdfScope Scope { get; set; }

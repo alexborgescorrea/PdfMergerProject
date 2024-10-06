@@ -5,7 +5,7 @@ namespace PdfMerger.Pdf.Readers;
 
 internal class PdfReader
 {
-    private readonly Stream _stream;
+    private Stream _stream;
     private readonly byte[] _bytesBuffer = new byte[1024];
     
     private static readonly SearchValues<byte> SpacesSearchValues = SearchValues.Create(PdfConstants.Spaces);
@@ -16,7 +16,7 @@ internal class PdfReader
 
     public PdfReader(Stream stream)
     {
-        _stream = stream;
+        UpdateStream(stream);
     }
 
     public Memory<byte> Buffer => _buffer[_currentBufferIndex..];
@@ -24,6 +24,13 @@ internal class PdfReader
     public long Position => _stream.Position - _buffer.Length + _currentBufferIndex;
     public byte Value => _buffer.Span[_currentBufferIndex];
     
+    public void UpdateStream(Stream stream)
+    {
+        _stream = stream;
+        _currentBufferIndex = 0;
+        _buffer = Memory<byte>.Empty;
+    }
+
     public async Task<bool> NextTokenAsync()
     {
         if (IsSpace())
