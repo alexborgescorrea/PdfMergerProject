@@ -1,9 +1,14 @@
-﻿namespace PdfMerger.Pdf;
+﻿using PdfMerger.Pdf.Structs;
+
+namespace PdfMerger.Pdf;
 
 internal class PdfContext
 {
-    public PdfReference Root { get; set; }
+    public int LargestObjNumer { get; set; }
+    public int BaseReference { get; set; } = 2;
+    public PdfXRefItem Root { get; set; }
     public PdfScope Scope { get; set; }
-    public List<PdfReferenceValue> Pages { get; } = new(10);
-    public List<PdfReference> References { get; } = new(100);
+    public int PagesCount { get; set; }
+    public List<PdfCatalog> Catalogs { get; } = new(10);
+    public List<PdfXRefItem> References { get; } = new(100);    
 }

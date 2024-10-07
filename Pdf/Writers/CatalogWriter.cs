@@ -1,25 +1,24 @@
-﻿namespace PdfMerger.Pdf.Writers;
+﻿using PdfMerger.Pdf.Structs;
+using System.Runtime.CompilerServices;
+using System.Text;
+
+namespace PdfMerger.Pdf.Writers;
 
 internal class CatalogWriter
 {
     private readonly Stream _stream;
-    private static readonly byte[] StartObjCatalog = "<<1 0 obj\n/Type /Catalog"u8.ToArray();
-    private static readonly byte[] Pages = "/Pages "u8.ToArray();
-    private static readonly byte[] PageLabels = "/PageLabels "u8.ToArray();
-    private static readonly byte[] Names = "/Names "u8.ToArray();
+    private static readonly byte[] ObjCatalog = "\n1 0 obj\n<</Type/Catalog /Pages 2 0 R>>\nendobj"u8.ToArray();
 
     public CatalogWriter(Stream stream)
     {
         _stream = stream;
     }
     
-    public ValueTask WriteStartObjAsync()
+    public async ValueTask<PdfXRefItem> WriteObjCatalogAsync()
     {
-        return _stream.WriteAsync(StartObjCatalog);
-    }
-    
-    public ValueTask WritePagesAsync()
-    {
-        return _stream.WriteAsync(StartObjCatalog);
+        var position = _stream.Position + 1;        
+        await _stream.WriteAsync(ObjCatalog);
+
+        return new(new(1, 0), position, position);
     }
 }

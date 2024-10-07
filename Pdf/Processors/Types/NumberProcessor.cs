@@ -1,5 +1,6 @@
 ﻿using PdfMerger.Pdf.Matchers;
 using PdfMerger.Pdf.Readers;
+using PdfMerger.Pdf.Structs;
 using PdfMerger.Pdf.Writers;
 
 namespace PdfMerger.Pdf.Processors.Types;
@@ -17,7 +18,7 @@ internal class NumberProcessor : IProcessor
             return false;
 
         await writer.WriteLineAsync(chunk[..index]);
-        
+
         return await reader.MoveAsync(index);
     }
 }
