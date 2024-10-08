@@ -5,7 +5,7 @@ namespace PdfMerger.Pdf.Readers;
 
 internal class PdfReader
 {
-    private Stream _stream;
+    private Stream? _stream;
     private readonly byte[] _bytesBuffer = new byte[1024];
     
     private static readonly SearchValues<byte> SpacesSearchValues = SearchValues.Create(PdfConstants.Spaces);
@@ -14,15 +14,8 @@ internal class PdfReader
     private Memory<byte> _buffer;
     private int _currentBufferIndex;
 
-    public PdfReader(Stream stream)
-    {
-        UpdateStream(stream);
-    }
-
-    public Memory<byte> Buffer => _buffer[_currentBufferIndex..];
-
-    public long Position => _stream.Position - _buffer.Length + _currentBufferIndex;
-    public byte Value => _buffer.Span[_currentBufferIndex];
+    public long Position => _stream!.Position - _buffer.Length + _currentBufferIndex;
+    public byte? Value => _currentBufferIndex < _buffer.Length ? _buffer.Span[_currentBufferIndex] : null;
     
     public void UpdateStream(Stream stream)
     {
@@ -76,6 +69,16 @@ internal class PdfReader
     {
         var chunk = await ChunkAsync(filter.Length);
         return chunk.Span.StartsWith(filter.Span);
+    }
+    
+    public async Task<bool> IsTokenAsync(Memory<byte> filter)
+    {
+        var chunk = await ChunkAsync(filter.Length + 1);
+        if (!chunk.Span.StartsWith(filter.Span))
+            return false;
+
+        return chunk.Length == filter.Length || 
+               PdfConstants.Delimiters.Contains(chunk.Span[filter.Length]);
     }
     
     public async Task<Memory<byte>> ChunkAsync(int numBytes)
@@ -167,10 +170,8 @@ internal class PdfReader
         }
     }
     
-    public bool IsSpace() => PdfConstants.Spaces.Contains(Value);
-    public bool IsDelimiter() => PdfConstants.Delimiters.Contains(Value);
-    private bool IsDelimiterWithoutSpaces() => PdfConstants.DelimitersWithoutSpaces.Contains(Value);
-    
+    public bool IsSpace() => Value.HasValue && PdfConstants.Spaces.Contains(Value.Value);
+    private bool IsDelimiterWithoutSpaces() => Value.HasValue && PdfConstants.DelimitersWithoutSpaces.Contains(Value.Value);
     private bool CanMove(int numBytes) => _currentBufferIndex + numBytes < _buffer.Length;
     
     public async Task<bool> ReadNextBytesToBufferAsync(int keepLastBytes = 0)
@@ -179,7 +180,7 @@ internal class PdfReader
         if (keepLastBytes > 0 && _buffer.Length > 0)
             _buffer[^keepLastBytes..].CopyTo(_buffer);
         
-        var num = await _stream.ReadAsync(_bytesBuffer, keepLastBytes, _bytesBuffer.Length - keepLastBytes);
+        var num = await _stream!.ReadAsync(_bytesBuffer, keepLastBytes, _bytesBuffer.Length - keepLastBytes);
         var numKeep = num + keepLastBytes;
         _buffer = new Memory<byte>(_bytesBuffer, 0, numKeep);
         _currentBufferIndex = 0;
@@ -199,6 +200,13 @@ internal class PdfReader
     public int IndexOfInBuffer(Memory<byte> filter)
     {
         return _buffer.Span[_currentBufferIndex..].IndexOf(filter.Span);
+    }
+    
+    public int IndexOfInBuffer(Memory<byte> filter1, Memory<byte> filter2)
+    {
+        var span = _buffer.Span[_currentBufferIndex..];
+        var index = span.IndexOf(filter1.Span);
+        return  index == -1 ? span.IndexOf(filter2.Span) : index;
     }
     
     public int IndexOfAnyInBuffer(SearchValues<byte> filter)

@@ -16,7 +16,7 @@ internal class StringProcessor : IProcessor
         if (reader.Value != '(')
             return false;
         
-        writer.WriteNewLine();
+        writer.WriteSpace();
         while (true)
         {
             if (!await writer.WriteAndMoveAtIndexOfAnyAsync(reader, NextTokensSearchValues))

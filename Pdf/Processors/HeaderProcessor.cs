@@ -12,7 +12,8 @@ internal class HeaderProcessor : IProcessor
         
         await writer.WriteHeaderAsync();
         await writer.WriteBitStringAsync();
-        
+
+        await reader.MoveAsync(PdfConstants.PdfHeaderSignature.Length);
         return await reader.NextTokenAsync();
     }
 }

@@ -21,6 +21,7 @@ internal class TypesProcessor : IProcessor
             BooleanProcessor.Instance, 
             NullProcessor.Instance,
             StreamProcessor.Instance,
+            ObStm2Processor.Instance,
             HexadecimalProcessor.Instance 
         ]
     );

@@ -13,7 +13,8 @@ internal class EndArrayProcessor : IProcessor
             return false;
             
         await writer.WriteEndArrayAsync();
-        
-        return await reader.NextTokenAsync();
+        await reader.NextTokenAsync();
+
+        return true;
     }
 }

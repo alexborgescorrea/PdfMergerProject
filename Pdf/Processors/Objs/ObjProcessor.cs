@@ -1,5 +1,4 @@
 ﻿using PdfMerger.Pdf.Matchers;
-using PdfMerger.Pdf.Matchers.Base;
 using PdfMerger.Pdf.Processors.Types;
 using PdfMerger.Pdf.Readers;
 using PdfMerger.Pdf.Structs;
@@ -54,10 +53,6 @@ internal class ObjProcessor : IProcessor
         return await reader.MoveAsync(index);
     }
 
-    private static void AddReference(PdfContext context, PdfWriter writer, long originalPosition, PdfReferenceValue reference)
-    {        
-    }
-
     private static void UpdateContext(PdfContext context)
     {
         UpdateCatalogContext(context);
@@ -80,9 +75,7 @@ internal class ObjProcessor : IProcessor
 
     private static void UpdatePageCountContext(PdfContext context)
     {
-        if (context.Scope.ObjType != ObjType.Page)
-            return;
-
-        context.PagesCount++;
+        if (context.Scope.ObjType == ObjType.Page)
+            context.PagesCount++;
     }
 }

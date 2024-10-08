@@ -1,7 +1,4 @@
-﻿using System.IO;
-using System.Numerics;
-
-namespace PdfMerger.Pdf.Structs;
+﻿namespace PdfMerger.Pdf.Structs;
 
 internal readonly record struct PdfReferenceValue(int Number, int Generation)
 {

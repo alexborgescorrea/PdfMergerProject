@@ -13,8 +13,9 @@ internal class EndDictionaryProcessor : IProcessor
     public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, PdfWriter writer)
     {
         var chunk = await reader.ChunkAsync(2);
-        if (chunk.Span.SequenceEqual(Tokens) && await reader.MoveAsync(2))
+        if (chunk.Span.SequenceEqual(Tokens))
         {
+            await reader.MoveAsync(2);
             await WriteExtraPropertiesInObjAsync(context, reader, writer);
             await writer.WriteEndDictionaryAsync();
             return true;

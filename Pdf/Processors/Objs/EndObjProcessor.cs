@@ -1,5 +1,7 @@
 ﻿using PdfMerger.Pdf.Matchers;
+using PdfMerger.Pdf.Processors.Types;
 using PdfMerger.Pdf.Readers;
+using PdfMerger.Pdf.Structs;
 using PdfMerger.Pdf.Writers;
 
 namespace PdfMerger.Pdf.Processors.Objs;
@@ -16,7 +18,9 @@ internal class EndObjProcessor : IProcessor
         if (index == -1)
             return false;
         
-        await writer.WriteEndObjAsync();
+        if (context.Scope.ObjType != ObjType.ObjStm)
+            await writer.WriteEndObjAsync();
+        
         return await reader.MoveAsync(index);
     }
 }

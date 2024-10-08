@@ -10,5 +10,6 @@ internal readonly record struct PdfScope
     public PdfReferenceValue Pages { get; init; }    
     public PdfReferenceValue PageLabels { get; init; }
     public bool HasPagesParent { get; init; }
+    public PdfObjStm ObjStm { get; init; }
     public bool IsTypeKey => KeyName == KeyName.Type;
 }

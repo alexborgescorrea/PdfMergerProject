@@ -10,7 +10,6 @@ internal static class PdfConstants
     public static byte[] Delimiters = [..Spaces, ..DelimitersWithoutSpaces];
     public static byte[] StartDelimiters = [..Spaces, (byte)'(', (byte)'<', (byte)'[', (byte)'{', (byte)'/', (byte)'%'];
     public static byte[] EndDelimiters = [..Spaces, (byte)')', (byte)'>', (byte)']', (byte)'}', (byte)'/', (byte)'%'];
-    public static byte[] Numbers = [(byte)'0', (byte)'1', (byte)'2', (byte)'3', (byte)'4', (byte)'5', (byte)'6', (byte)'7', (byte)'8', (byte)'9'];
     public static byte NewLine = 10;
     
     public static SearchValues<byte> SpacesSearchValues = SearchValues.Create(Spaces);

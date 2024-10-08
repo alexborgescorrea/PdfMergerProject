@@ -18,6 +18,8 @@ internal class KeyProcessor : IProcessor
     private static readonly byte[] PagesToken = "Pages"u8.ToArray();
     private static readonly byte[] PageToken = "Page"u8.ToArray();
     private static readonly byte[] ParentToken = "Parent"u8.ToArray();    
+    private static readonly byte[] ObjStmNToken = "N"u8.ToArray();
+    private static readonly byte[] ObjStmFirstToken = "First"u8.ToArray();
 
     public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, PdfWriter writer)
     {
@@ -55,17 +57,23 @@ internal class KeyProcessor : IProcessor
         if (context.Scope.Level != 1)
             return KeyName.None;
 
-        if (await reader.StartWithAsync(TypeToken))
+        if (await reader.IsTokenAsync(TypeToken))
             return KeyName.Type;
 
-        if (await reader.StartWithAsync(PagesToken))
+        if (await reader.IsTokenAsync(PagesToken))
             return KeyName.Pages;
 
-        if (await reader.StartWithAsync(PageToken))
+        if (await reader.IsTokenAsync(PageToken))
             return KeyName.Page;
 
-        if (await reader.StartWithAsync(ParentToken))
+        if (await reader.IsTokenAsync(ParentToken))
             return KeyName.PagesParent;        
+        
+        if (await reader.IsTokenAsync(ObjStmNToken))
+            return KeyName.ObjStmN;
+        
+        if (await reader.IsTokenAsync(ObjStmFirstToken))
+            return KeyName.ObjStmFirst;
 
         return KeyName.None;
     }

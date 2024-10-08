@@ -1,6 +1,4 @@
 ﻿using PdfMerger.Pdf.Structs;
-using System.Runtime.CompilerServices;
-using System.Text;
 
 namespace PdfMerger.Pdf.Writers;
 

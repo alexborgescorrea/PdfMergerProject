@@ -11,7 +11,7 @@ internal class StartXRefProcessor : IProcessor
     
     public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, PdfWriter writer)
     {
-        if (!await reader.StartWithAsync(StartXrefToken))
+        if (!await reader.IsTokenAsync(StartXrefToken))
             return false;
         
         return await reader.FindAndMoveAsync(EofToken) && 

@@ -1,5 +1,4 @@
 ﻿using PdfMerger.Pdf.Readers;
-using PdfMerger.Pdf.Structs;
 using PdfMerger.Pdf.Writers;
 
 namespace PdfMerger.Pdf.Processors.Types.Dictionaries;

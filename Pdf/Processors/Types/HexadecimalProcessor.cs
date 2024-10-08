@@ -17,8 +17,7 @@ internal class HexadecimalProcessor : IProcessor
         var chunk = await reader.ChunkAsync(2);
         if (chunk.Span.SequenceEqual(Tokens))
             return false;
-
-        writer.WriteNewLine();
+        
         return await writer.WriteAndMoveAtAsync(reader, GreaterThanToken) && 
                await reader.NextTokenAsync();
     }

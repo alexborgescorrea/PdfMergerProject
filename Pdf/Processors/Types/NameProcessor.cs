@@ -10,6 +10,7 @@ internal class NameProcessor : IProcessor
     private static readonly byte[] CatalogToken = "Catalog"u8.ToArray();
     private static readonly byte[] PagesToken = "Pages"u8.ToArray();
     private static readonly byte[] PageToken = "Page"u8.ToArray();
+    private static readonly byte[] ObjStmToken = "ObjStm"u8.ToArray();
 
     public async Task<bool> ProcessAsync(PdfContext context, PdfReader reader, PdfWriter writer)
     {
@@ -39,14 +40,17 @@ internal class NameProcessor : IProcessor
 
     private static async Task<ObjType> ResolveObjTypeAsync(PdfReader reader)
     {
-        if (await reader.StartWithAsync(CatalogToken))
+        if (await reader.IsTokenAsync(CatalogToken))
             return ObjType.Catalog;
 
-        if (await reader.StartWithAsync(PagesToken))
+        if (await reader.IsTokenAsync(PagesToken))
             return ObjType.Pages;
 
-        if (await reader.StartWithAsync(PageToken))
+        if (await reader.IsTokenAsync(PageToken))
             return ObjType.Page;
+        
+        if (await reader.IsTokenAsync(ObjStmToken))
+            return ObjType.ObjStm;
 
         return ObjType.None;
     }

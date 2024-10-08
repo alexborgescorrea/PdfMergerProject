@@ -13,6 +13,9 @@ internal class SignalNumberMatcher : IMatcher
     
     public int Match(ReadOnlySpan<byte> bytes)
     {
+        if (bytes.Length == 0)
+            return -1;
+            
         var dot = false;
         var index = bytes[0] is PlusToken or MinusToken ? 0 : -1;
 
@@ -24,7 +27,7 @@ internal class SignalNumberMatcher : IMatcher
                 index++;
                 continue;
             }
-            
+
             if (bytes[i] is < ZeroToken or > NineToken)
                 return index;
 

@@ -5,14 +5,14 @@ using PdfMerger.Pdf.Structs;
 
 namespace PdfMerger.Pdf.Writers;
 
-internal class PdfWriter
+internal class PdfWriter : IDisposable, IAsyncDisposable
 {
     private static readonly byte[] PdfHeader = "%PDF-2.0"u8.ToArray();
     private static readonly byte[] BitString = [0x0D, 0x25, 0xE2, 0xE3, 0xCF, 0xD3];    
     private static readonly byte[] EndObj = "\nendobj"u8.ToArray();
-    private static readonly byte[] StartDictionary = "\n<<"u8.ToArray();
-    private static readonly byte[] EndDictionary = "\n>>"u8.ToArray();
-    private static readonly byte[] StartName = "\n/"u8.ToArray();
+    private static readonly byte[] StartDictionary = "<<"u8.ToArray();
+    private static readonly byte[] EndDictionary = ">>"u8.ToArray();
+    private static readonly byte[] StartName = "/"u8.ToArray();
     private static readonly byte[] StartArray = " ["u8.ToArray();
     private static readonly byte[] EndArray = " ]"u8.ToArray();
     private static readonly byte[] TrueValue = " true"u8.ToArray();
@@ -32,6 +32,13 @@ internal class PdfWriter
     }
 
     public long Position => _stream.Position;
+
+    public Stream Stream => _stream;
+    
+    public Task CopyFromAsync(Stream stream)
+    {
+        return stream.CopyToAsync(_stream);
+    }
     
     public Task WriteHeaderAsync()
     {
@@ -41,6 +48,16 @@ internal class PdfWriter
     public Task WriteBitStringAsync()
     {
         return _stream.WriteAsync(BitString, 0, BitString.Length);
+    }
+    public void WriteSpace()
+    {
+        _stream.WriteByte(0x20);
+    }
+    
+    public ValueTask WriteWithSpaceAsync(ReadOnlyMemory<byte> bytes)
+    {
+        WriteSpace();
+        return WriteAsync(bytes);
     }
     
     public void WriteNewLine()
@@ -52,6 +69,7 @@ internal class PdfWriter
     {
         WriteNewLine();
         await WriteAsync(obj.GetObjBytes());
+        WriteNewLine();
     }
 
     public ValueTask WriteLineAsync(ReadOnlyMemory<byte> bytes)
@@ -62,7 +80,7 @@ internal class PdfWriter
 
     public ValueTask WriteReferenceValueAsync(PdfReferenceValue reference)
     {
-        WriteNewLine();
+        WriteSpace();
         return WriteAsync(reference.GetReferenceBytes());
     }
 
@@ -154,23 +172,55 @@ internal class PdfWriter
         return false;
     }
     
-    public async Task<bool> WriteAndMoveAtAsync(PdfReader reader, Memory<byte> filter)
+    public Task<bool> WriteAndMoveAtAsync(PdfReader reader, Memory<byte> filter)
     {
+        return WriteAndMoveAtAsync(reader, _stream, filter);
+    }
+    
+    public Task<bool> WriteAndMoveAtAsync(PdfReader reader, Memory<byte> filter1, Memory<byte> filter2)
+    {
+        return WriteAndMoveAtAsync(reader, _stream, filter1, filter2);
+    }
+    
+    public async Task<bool> WriteAndMoveAtAsync(PdfReader reader, Stream stream, Memory<byte> filter, bool copyAtEndFilter = true)
+    {
+        var lengthCopy = copyAtEndFilter ? filter.Length : 0;
         var indexKeepLastBytes = 0;
         do
         {
             var index = reader.IndexOfInBuffer(filter);
             if (index != -1)
             {
-                await reader.CopyBufferToAsync(_stream, indexKeepLastBytes, index + (filter.Length - indexKeepLastBytes));
+                await reader.CopyBufferToAsync(stream, indexKeepLastBytes, index + (lengthCopy - indexKeepLastBytes));
                 await reader.MoveAsync(index);
                 return true;
             }
 
-            if (await reader.CopyAllBufferToAsync(_stream, indexKeepLastBytes))
+            if (await reader.CopyAllBufferToAsync(stream, indexKeepLastBytes))
                 indexKeepLastBytes = filter.Length;
         } 
         while (await reader.ReadNextBytesToBufferAsync(filter.Length));
+
+        return false;
+    }
+    
+    public async Task<bool> WriteAndMoveAtAsync(PdfReader reader, Stream stream, Memory<byte> filter1, Memory<byte> filter2)
+    {
+        var indexKeepLastBytes = 0;
+        do
+        {
+            var index = reader.IndexOfInBuffer(filter1, filter2);
+            if (index != -1)
+            {
+                await reader.CopyBufferToAsync(stream, indexKeepLastBytes, index + (filter1.Length - indexKeepLastBytes));
+                await reader.MoveAsync(index);
+                return true;
+            }
+
+            if (await reader.CopyAllBufferToAsync(stream, indexKeepLastBytes))
+                indexKeepLastBytes = filter1.Length;
+        } 
+        while (await reader.ReadNextBytesToBufferAsync(filter1.Length));
 
         return false;
     }
@@ -246,5 +296,15 @@ internal class PdfWriter
     public Task FlushAsync()
     {
         return _stream.FlushAsync();
+    }
+
+    public void Dispose()
+    {
+        _stream.Dispose();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _stream.DisposeAsync();
     }
 }

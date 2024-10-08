@@ -1,6 +1,4 @@
-﻿using System.Text;
-using PdfMerger.Pdf.Matchers;
-using PdfMerger.Pdf.Matchers.Base;
+﻿using PdfMerger.Pdf.Matchers;
 using PdfMerger.Pdf.Readers;
 using PdfMerger.Pdf.Structs;
 using PdfMerger.Pdf.Writers;

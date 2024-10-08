@@ -1,17 +1,11 @@
 ﻿using PdfMerger.Pdf.Structs;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PdfMerger.Pdf.Writers
 {
     internal class PagesWriter
     {
         private static readonly byte[] PagesParent = "\n/Parent 2 0 R"u8.ToArray();
-        private static readonly byte[] StartObjPages = "\n<2 0 obj\n<</Type/Pages /Kids["u8.ToArray();
+        private static readonly byte[] StartObjPages = "\n2 0 obj\n<</Type/Pages /Kids["u8.ToArray();
         private static readonly byte[] CountPages = "]/Count "u8.ToArray();
         private static readonly byte[] EndObjPages = ">>\nendobj"u8.ToArray();
 
@@ -27,7 +21,7 @@ namespace PdfMerger.Pdf.Writers
             var position = _stream.Position + 1;
             await _stream.WriteAsync(StartObjPages);
 
-            foreach (var catalog in context.Catalogs)
+            foreach (var catalog in context.Catalogs.Distinct())
             {
                 await _stream.WriteAsync(catalog.Pages.GetReferenceBytes());
                 _stream.WriteByte((byte)' ');

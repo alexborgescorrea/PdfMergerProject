@@ -1,7 +1,7 @@
 ﻿using PdfMerger.Exceptions;
 using PdfMerger.Pdf.Readers;
-using PdfMerger.Pdf.Structs;
 using PdfMerger.Pdf.Writers;
+using PdfMerger.Tools;
 
 namespace PdfMerger.Pdf.Processors;
 
@@ -12,14 +12,24 @@ internal class PdfProcessor
 
     public async Task ProcessAsync(PdfContext context, PdfWriter writer, params Stream[] streams)
     {
-        var reader = new PdfReader(null!);                
+        var progressBar = new ProgressBar();
+        var reader = new PdfReader();
+        var index = 0d;
         foreach (var stream in streams)
         {
-            context.BaseReference += context.LargestObjNumer;
-            context.LargestObjNumer = 0;
-            reader.UpdateStream(stream);
-            await ProcessInternalAsync(context, reader, writer);
-            stream.Seek(0, SeekOrigin.Begin);
+            try
+            {
+                index++;
+                progressBar.Report(index / streams.Length);
+                context.BaseReference += context.LargestObjNumer;
+                context.LargestObjNumer = 0;
+                reader.UpdateStream(stream);
+                await ProcessInternalAsync(context, reader, writer);
+            }
+            catch
+            {
+                Console.WriteLine(((FileStream)stream).Name);
+            }
         }
 
         var pagesXRefItem = await writer.WriteObjPagesAsync(context);
